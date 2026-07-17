@@ -48,3 +48,12 @@ At the end, report only:
 - Validation commands executed.
 - Final test result.
 - Any remaining limitation.
+
+## Tool failure recovery
+
+- Never repeat the same failed file-edit operation unchanged.
+- After one failed search/replace edit, read the current file again.
+- After a second failed diff edit on the same file, rewrite the complete file.
+- Do not attempt the same search pattern more than once.
+- After any tool failure, change strategy before retrying.
+- 

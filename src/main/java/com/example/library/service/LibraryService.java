@@ -25,14 +25,22 @@ public class LibraryService {
         return authorRepository.findBookTitlesByNombre(nombre);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public Book saveBook(Book book, Author... authors) {
         for (Author author : authors) {
             if (!book.getAuthors().contains(author)) {
                 book.addAuthor(author);
             }
+            if (!author.getBooks().contains(book)) {
+                author.addBook(book);
+            }
         }
-        return bookRepository.save(book);
+        // Save Book first to get an ID, then Authors so join table gets populated.
+        book = bookRepository.save(book);
+        for (Author author : authors) {
+            authorRepository.save(author);
+        }
+        return book;
     }
 
     @Transactional(readOnly = true)

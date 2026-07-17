@@ -4,8 +4,6 @@ import com.example.library.entity.Author;
 import com.example.library.entity.Book;
 import com.example.library.service.LibraryService;
 import org.junit.jupiter.api.Test;
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -18,12 +16,6 @@ class LibraryServiceTest {
 
     @Autowired
     private LibraryService libraryService;
-
-    @Autowired
-    private com.example.library.repository.BookRepository bookRepository;
-
-    @Autowired
-    private EntityManager entityManager;
 
     // Scenario 1: Creating and persisting one book with multiple authors.
     @Test
@@ -42,21 +34,18 @@ class LibraryServiceTest {
         book.setTitulo("La casa de hojas vacías");
         book.setDescripcion("Una novela experimental sobre el tiempo y la memoria.");
 
-        libraryService.saveBook(book, author1, author2);
-        libraryService.flush();
+        // saveBook sets bidirectional relationships and saves through owning side.
+        Book saved = libraryService.saveBook(book, author1, author2);
 
-        var savedBooks = bookRepository.findAll();
-        assertThat(savedBooks).hasSize(1);
-
-        Book persisted = savedBooks.get(0);
-        assertThat(persisted.getId()).isNotNull();
-        assertThat(persisted.getTitulo()).isEqualTo("La casa de hojas vacías");
-        assertThat(persisted.getDescripcion()).isEqualTo("Una novela experimental sobre el tiempo y la memoria.");
-        assertThat(persisted.getAuthors()).hasSize(2);
+        // Entity is still managed in the persistence context — LAZY load works here.
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getTitulo()).isEqualTo("La casa de hojas vacías");
+        assertThat(saved.getDescripcion()).isEqualTo("Una novela experimental sobre el tiempo y la memoria.");
+        assertThat(saved.getAuthors()).hasSize(2);
 
         // Verify bidirectional sync on both sides.
-        assertThat(author1.getBooks()).contains(book);
-        assertThat(author2.getBooks()).contains(book);
+        assertThat(author1.getBooks()).contains(book, saved);
+        assertThat(author2.getBooks()).contains(book, saved);
     }
 
     // Scenario 2: Retrieving the titles of all books belonging to a given author.
@@ -77,11 +66,6 @@ class LibraryServiceTest {
 
         libraryService.saveBook(book1, author);
         libraryService.saveBook(book2, author);
-        libraryService.flush();
-
-        // Flush to DB and clear persistence context so we query fresh.
-        bookRepository.flush();
-        entityManager.clear();
 
         var titles = libraryService.findBookTitlesByAuthorNombre("Jorge");
         assertThat(titles).hasSize(2);

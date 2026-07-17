@@ -1,6 +1,18 @@
 # AGENTIC CODING BENCHMARK
 
-Work directly in this repository and create the complete project from scratch.
+## Mandatory environment preflight
+
+Before creating or modifying any project file, run exactly:
+
+```bash
+java -version
+javac -version
+mvn -version
+```
+If any check fails, stop immediately and report the exact problem.
+
+Then work directly in this repository and create the complete project from scratch.
+
 
 ## Objective
 

@@ -1,23 +1,50 @@
-# REGLAS DEL AGENTE
+# AGENT OPERATING RULES
 
-- Trabaja exclusivamente dentro del repositorio actual.
-- No uses sudo, apt, curl ni wget.
-- No instales ni descargues Java, Maven u otras herramientas.
-- Java 21 y Maven ya están instalados globalmente.
-- Usa `mvn test` para validar.
-- Maven puede descargar las dependencias declaradas en el pom.xml.
-- Crea el proyecto Spring Boot completo desde cero.
-- No modifiques AGENTS.md ni BENCHMARK_TASK.md.
-- Si java, javac o mvn no están disponibles, detente y explica el bloqueo.
-- No hagas push, merge, rebase ni cambies de rama.
+## Scope and safety
 
-Haz commits por unidades lógicas:
+- Work only inside the current repository directory.
+- Do not create, modify, move, or delete files outside the current repository.
+- Do not use `sudo`, `apt`, `apt-get`, `dnf`, `pacman`, `snap`, or `flatpak`.
+- Do not install or download Java, Maven, build tools, IDEs, runtimes, or binaries.
+- Do not use `curl`, `wget`, a browser, or external web services to solve the task.
+- Java 21, `javac`, and Maven are already installed globally.
+- If `java`, `javac`, or `mvn` are unavailable, stop and report the exact blocking condition.
+- Do not modify `AGENTS.md` or `BENCHMARK_TASK.md`.
+- Do not use `git push`, `merge`, `rebase`, `reset`, or switch branches.
 
-1. estructura y pom.xml;
-2. entidades;
-3. repositorios y servicio;
-4. tests;
-5. correcciones finales.
+## Build and validation
 
-Antes de cada commit ejecuta `git status --short`.
-No declares la tarea terminada hasta obtener `BUILD SUCCESS`.
+- Use `mvn test` as the validation command.
+- Do not claim that the project compiles unless you have run `mvn test`.
+- Do not declare the task complete while compilation or any test is failing.
+- After each failure, inspect the output and fix only the identified cause.
+- The task may end only in one of these states:
+  1. `mvn test` finishes with `BUILD SUCCESS`.
+  2. A genuine environment blocker prevents further progress without violating these rules.
+
+## Git workflow
+
+Create one commit after each coherent logical unit:
+
+1. Project structure and `pom.xml`.
+2. JPA entities.
+3. Repositories and service.
+4. Tests.
+5. Final fixes required to obtain `BUILD SUCCESS`.
+
+Before every commit:
+
+- Run `git status --short`.
+- Stage only the files related to that logical unit.
+- Use a clear, descriptive commit message.
+- Do not commit `target/`, downloaded files, generated binaries, or temporary files.
+
+## Completion report
+
+At the end, report only:
+
+- Files created or modified.
+- Commits created.
+- Validation commands executed.
+- Final test result.
+- Any remaining limitation.

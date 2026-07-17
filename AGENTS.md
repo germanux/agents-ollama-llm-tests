@@ -1,59 +1,31 @@
-# AGENT OPERATING RULES
+# AGENT RULES
 
-## Scope and safety
+## Scope
 
-- Work only inside the current repository directory.
-- Do not create, modify, move, or delete files outside the current repository.
-- Do not use `sudo`, `apt`, `apt-get`, `dnf`, `pacman`, `snap`, or `flatpak`.
-- Do not install or download Java, Maven, build tools, IDEs, runtimes, or binaries.
-- Do not use `curl`, `wget`, a browser, or external web services to solve the task.
-- Java 21, `javac`, and Maven are already installed globally.
-- If `java`, `javac`, or `mvn` are unavailable, stop and report the exact blocking condition.
+- Work only inside this repository.
 - Do not modify `AGENTS.md` or `BENCHMARK_TASK.md`.
-- Do not use `git push`, `merge`, `rebase`, `reset`, or switch branches.
+- Do not create, modify, or delete files outside the repository.
+- Do not use `sudo`, package managers, browsers, `curl`, or `wget`.
+- Do not install or download Java, Maven, runtimes, IDEs, or binaries.
+- Java 21, `javac`, and Maven are already installed.
+- Maven may download dependencies declared in `pom.xml`.
+- Do not push, merge, rebase, reset, or switch branches.
 
-## Build and validation
+## Execution
 
-- Use `mvn test` as the validation command.
-- Do not claim that the project compiles unless you have run `mvn test`.
-- Do not declare the task complete while compilation or any test is failing.
-- After each failure, inspect the output and fix only the identified cause.
-- The task may end only in one of these states:
-  1. `mvn test` finishes with `BUILD SUCCESS`.
-  2. A genuine environment blocker prevents further progress without violating these rules.
+- Continue autonomously until `mvn test` reports `BUILD SUCCESS`.
+- Stop only for a genuine environment blocker that cannot be solved within these rules.
+- Fix production code or test setup without weakening the stated requirements.
+- Never remove required `flush()` or `clear()` calls merely to make tests pass.
+- Keep changes minimal and related to the task.
 
-## Git workflow
+## Git
 
-Create one commit after each coherent logical unit:
+Create commits for coherent milestones:
 
-1. Project structure and `pom.xml`.
-2. JPA entities.
-3. Repositories and service.
-4. Tests.
-5. Final fixes required to obtain `BUILD SUCCESS`.
+1. Project structure and build configuration.
+2. Application implementation.
+3. Tests and final fixes.
 
-Before every commit:
-
-- Run `git status --short`.
-- Stage only the files related to that logical unit.
-- Use a clear, descriptive commit message.
-- Do not commit `target/`, downloaded files, generated binaries, or temporary files.
-
-## Completion report
-
-At the end, report only:
-
-- Files created or modified.
-- Commits created.
-- Validation commands executed.
-- Final test result.
-- Any remaining limitation.
-
-## Tool failure recovery
-
-- Never repeat the same failed file-edit operation unchanged.
-- After one failed search/replace edit, read the current file again.
-- After a second failed diff edit on the same file, rewrite the complete file.
-- Do not attempt the same search pattern more than once.
-- After any tool failure, change strategy before retrying.
-- 
+Before each commit, run `git status --short` and stage only related files.
+Do not commit `target/`, IDE metadata, logs, or temporary files.

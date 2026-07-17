@@ -1,0 +1,8 @@
+# Build and IDE output
+target/
+.idea/
+*.iml
+*.log
+
+# Version-control internals
+.git/

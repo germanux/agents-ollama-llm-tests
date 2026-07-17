@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -u
 
-SOUND="/usr/share/sounds/freedesktop/stereo/complete.oga"
+sound="/usr/share/sounds/freedesktop/stereo/complete.oga"
 
-for _ in {1..3}; do
-    if command -v paplay >/dev/null 2>&1 && [[ -f "$SOUND" ]]; then
-        paplay "$SOUND"
+for _ in {1..5}; do
+    if command -v paplay >/dev/null 2>&1 && [[ -f "$sound" ]]; then
+        paplay "$sound"
     else
         printf '\a'
     fi

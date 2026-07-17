@@ -37,3 +37,5 @@ Restricciones:
 - analiza los fallos y corrige el proyecto hasta que todos los tests pasen
 - no termines hasta que la compilación y los tests estén verdes
 - no modifiques archivos ajenos al objetivo
+-  No ejecutes comandos que creen, modifiquen o eliminen archivos
+-  fuera del directorio de trabajo actual. No uses sudo.

@@ -75,3 +75,13 @@ Do not declare completion until Maven reports:
 ```text
 BUILD SUCCESS
 ```
+
+## Success notification
+
+Only after `mvn test` finishes with `BUILD SUCCESS`, run:
+
+```bash
+./notify-success.sh
+```
+
+Do not run the notification script if compilation or any test fails.

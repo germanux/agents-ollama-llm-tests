@@ -1,0 +1,6 @@
+com/example/librosautores/repository/AutorRepository.class
+com/example/librosautores/entity/Autor.class
+com/example/librosautores/entity/Libro.class
+com/example/librosautores/LibrosAutoresApplication.class
+com/example/librosautores/repository/LibroRepository.class
+com/example/librosautores/service/LibroServicio.class

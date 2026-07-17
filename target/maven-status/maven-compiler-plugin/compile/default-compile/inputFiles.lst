@@ -1,0 +1,6 @@
+/home/german/Desarrollo/agents-harness-benchmark/cline-cli/src/main/java/com/example/librosautores/entity/Autor.java
+/home/german/Desarrollo/agents-harness-benchmark/cline-cli/src/main/java/com/example/librosautores/repository/LibroRepository.java
+/home/german/Desarrollo/agents-harness-benchmark/cline-cli/src/main/java/com/example/librosautores/entity/Libro.java
+/home/german/Desarrollo/agents-harness-benchmark/cline-cli/src/main/java/com/example/librosautores/repository/AutorRepository.java
+/home/german/Desarrollo/agents-harness-benchmark/cline-cli/src/main/java/com/example/librosautores/service/LibroServicio.java
+/home/german/Desarrollo/agents-harness-benchmark/cline-cli/src/main/java/com/example/librosautores/LibrosAutoresApplication.java

@@ -1,6 +1,6 @@
 # AGENT RULES
 
-## Scope
+## Scope and safety
 
 - Work only inside this repository.
 - Do not modify `AGENTS.md` or `BENCHMARK_TASK.md`.
@@ -11,13 +11,31 @@
 - Maven may download dependencies declared in `pom.xml`.
 - Do not push, merge, rebase, reset, or switch branches.
 
-## Execution
+## Working method
 
+- Think before editing and identify the actual cause of the failure.
+- Keep the implementation simple.
+- Make the smallest change that addresses the observed problem.
+- Preserve working code and change one cause at a time.
+- Do not weaken or remove task requirements merely to make tests pass.
 - Continue autonomously until `mvn test` reports `BUILD SUCCESS`.
-- Stop only for a genuine environment blocker that cannot be solved within these rules.
-- Fix production code or test setup without weakening the stated requirements.
-- Never remove required `flush()` or `clear()` calls merely to make tests pass.
-- Keep changes minimal and related to the task.
+
+## Tool failure recovery
+
+- Never repeat an unchanged failed tool call.
+- After a failed patch, read the current file again before retrying.
+- After two failed patch attempts on the same file, rewrite that file completely.
+- After a failed command, use its actual output as the next diagnostic input.
+- Change strategy after every repeated failure.
+- Do not stop merely because the task is difficult or the model is local.
+- Do not claim the context is full unless execution is actually blocked.
+
+## Validation
+
+- Run `mvn test` after every meaningful correction.
+- Do not claim success while compilation or any test is failing.
+- Keep required `flush()` and `clear()` persistence checks.
+- Stop only after `BUILD SUCCESS` or a genuine environment blocker.
 
 ## Git
 
@@ -27,5 +45,8 @@ Create commits for coherent milestones:
 2. Application implementation.
 3. Tests and final fixes.
 
-Before each commit, run `git status --short` and stage only related files.
-Do not commit `target/`, IDE metadata, logs, or temporary files.
+Before each commit:
+
+- Run `git status --short`.
+- Stage only related files.
+- Do not commit `target/`, IDE metadata, logs, or temporary files.

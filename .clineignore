@@ -12,4 +12,5 @@ target/
 .cline-config/
 .cline-state/
 /cline-laptop-remote/
+.ollama-modelfiles
 launch-cline.sh

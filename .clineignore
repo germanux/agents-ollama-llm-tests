@@ -7,4 +7,5 @@ target/
 # Version-control internals
 .git/
 /LICENSE
+cline-laptop-remote/
 launch-cline.sh

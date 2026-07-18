@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "lastUsedProvider": "ollama",
+  "providers": {
+    "ollama": {
+      "settings": {
+        "provider": "ollama",
+        "model": "ornith-cline-64k",
+        "protocol": "openai-chat",
+        "client": "ai-sdk-community",
+        "baseUrl": "http://192.168.1.7:11434",
+        "timeout": 600000,
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "tokenSource": "migration"
+    }
+  }
+}

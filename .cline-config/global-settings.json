@@ -1,0 +1,7 @@
+{
+  "autoUpdateEnabled": true,
+  "telemetryOptOut": true,
+  "disabledTools": [
+    "fetch_web_content"
+  ]
+}

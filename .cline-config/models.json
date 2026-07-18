@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "providers": {
+    "ollama": {
+      "provider": {
+        "name": "Ollama",
+        "baseUrl": "http://192.168.1.7:11434",
+        "defaultModelId": "ornith-cline-64k",
+        "protocol": "openai-chat",
+        "client": "ai-sdk-community",
+        "modelsSourceUrl": "http://192.168.1.7:11434/api/tags"
+      },
+      "models": {
+        "ornith-cline-64k": {
+          "id": "ornith-cline-64k",
+          "name": "ornith-cline-64k",
+          "supportsVision": false,
+          "supportsAttachments": false,
+          "supportsReasoning": false
+        },
+        "qwen3-coder:30b": {
+          "id": "qwen3-coder:30b",
+          "name": "qwen3-coder:30b",
+          "supportsVision": false,
+          "supportsAttachments": false,
+          "supportsReasoning": false
+        },
+        "qwen3-30b-direct:latest": {
+          "id": "qwen3-30b-direct:latest",
+          "name": "qwen3-30b-direct:latest",
+          "supportsVision": false,
+          "supportsAttachments": false,
+          "supportsReasoning": false
+        }
+      }
+    }
+  }
+}

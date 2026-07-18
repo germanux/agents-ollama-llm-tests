@@ -1,0 +1,6 @@
+cd ~/Desarrollo/agents-ollama-llm-tests.git/.ollama-modelfiles
+
+chmod +x configure-ollama-models.sh
+
+./configure-ollama-models.sh
+

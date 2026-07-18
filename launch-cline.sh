@@ -56,6 +56,9 @@ echo "[config] server=$OLLAMA_SERVER endpoint=$OLLAMA_URL"
 echo "[config] model=$MODEL cwd=$PWD"
 echo "[config] settings=$CONFIG_DIR state=$STATE_DIR"
 
+echo ">>> Inicio CLINE: $(date '+%d/%m/%Y %H:%M:%S %Z')"
+trap 'echo ">>> Fin CLINE:    $(date "+%d/%m/%Y %H:%M:%S %Z")"' EXIT
+
 CLINE_SESSION_BACKEND_MODE=local \
 cline \
   --config "$CONFIG_DIR" \
@@ -69,3 +72,5 @@ cline \
   --cwd "$PWD" \
   --verbose \
   "$PROMPT"
+
+echo ">>> Fin CLINE:    $(date '+%d/%m/%Y %H:%M:%S %Z')"

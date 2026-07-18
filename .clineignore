@@ -6,3 +6,5 @@ target/
 
 # Version-control internals
 .git/
+/LICENSE
+launch-cline.sh

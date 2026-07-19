@@ -60,6 +60,30 @@
     }
   },
 
+  "watcher": {
+    "ignore": [
+      ".git/**",
+      ".idea/**",
+      ".opencode/**",
+      ".opencode-runtime/**",
+      ".cline-config/**",
+      ".cline-runtime/**",
+      ".cline-state/**",
+      "cline-laptop-remote/**",
+      "node_modules/**",
+      "target/**",
+      "opencode-scripts/**",
+      "opencode.jsonc",
+      "package.json",
+      "package-lock.json",
+      "README.md",
+      "README-OPENCODE-STEP1.md",
+      "launch-cline.sh",
+      "LICENSE",
+      "*.log"
+    ]
+  },
+
   "permission": {
     "*": "deny",
 

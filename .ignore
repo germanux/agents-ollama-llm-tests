@@ -1,0 +1,22 @@
+# Dependencias y salidas generadas
+node_modules/
+target/
+dist/
+dist_gen/
+
+# IDE y metadatos
+.idea/
+*.iml
+
+# Estado interno
+.git/
+.opencode-runtime/
+.cline-runtime/
+.cline-state/
+
+# Logs
+*.log
+
+# Infraestructura de otros harnesses no relevante para el benchmark
+.cline-config/
+cline-laptop-remote/

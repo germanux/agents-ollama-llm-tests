@@ -1138,3 +1138,18 @@ git diff --cached
 ```
 
 **EN summary:** Treat agent logs as potentially sensitive engineering [artefacts].
+
+## LLaMando a los agentes
+
+```bash
+cd ~/Desarrollo/agents-harness-benchmark/opencode-local-16k
+
+npm run opencode -- \
+--print-logs \
+--log-level INFO \
+run \
+--agent benchmark-local \
+"Lee AGENTS.md y BENCHMARK_TASK.md completos y ejecuta exactamente la tarea. Empieza ahora y continúa hasta obtener BUILD SUCCESS o demostrar un bloqueo real." \
+2>&1 | tee "opencode-local-16k-$(date '+%Y%m%d-%H%M%S').log"
+
+```

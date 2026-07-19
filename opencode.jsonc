@@ -2,18 +2,24 @@
   "$schema": "https://opencode.ai/config.json",
 
   "autoupdate": false,
-  "model": "ollama/ornith-opencode-16k",
-  "small_model": "ollama/ornith-opencode-16k",
+  "share": "disabled",
+
+  "enabled_providers": [
+    "ollama-local",
+    "ollama-pc"
+  ],
+
+  "model": "ollama-local/ornith-opencode-16k",
+  "small_model": "ollama-local/ornith-opencode-16k",
 
   "default_agent": "plan",
   "subagent_depth": 0,
-
   "lsp": false,
 
   "provider": {
-    "ollama": {
+    "ollama-local": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama local - laptop",
+      "name": "Ollama portátil",
 
       "options": {
         "baseURL": "http://127.0.0.1:11434/v1",
@@ -23,18 +29,31 @@
 
       "models": {
         "ornith-opencode-16k": {
-          "name": "Ornith 35B - OpenCode 16K",
+          "name": "Ornith 35B portátil 16K",
           "limit": {
             "context": 16384,
-            "output": 1024
+            "output": 2048
           }
-        },
-        "qwen25-coder-opencode-16k": {
-          "name": "Qwen 2.5 Coder 7B - OpenCode 16K",
+        }
+      }
+    },
 
+    "ollama-pc": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama PC grande",
+
+      "options": {
+        "baseURL": "http://192.168.1.7:11434/v1",
+        "timeout": 600000,
+        "chunkTimeout": 180000
+      },
+
+      "models": {
+        "ornith-cline-64k": {
+          "name": "Ornith 35B PC 64K",
           "limit": {
-            "context": 16384,
-            "output": 1024
+            "context": 65536,
+            "output": 2048
           }
         }
       }

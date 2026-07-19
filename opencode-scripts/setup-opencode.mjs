@@ -6,8 +6,10 @@ import { spawnSync } from "node:child_process";
 const root = resolve(process.cwd());
 const version = process.env.OPENCODE_VERSION ?? "1.18.3";
 const packagePath = join(root, "package.json");
-const configPath = join(root, "opencode.jsonc");
-const runnerPath = join(root, "scripts", "run-opencode.mjs");
+const configPath = join(root, "opencode.jsonc")
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const root = resolve(scriptDir, "..");
+const runnerPath = join(scriptDir, "run-opencode.mjs");
 const gitignorePath = join(root, ".gitignore");
 
 function fail(message) {
@@ -26,7 +28,7 @@ if (!existsSync(configPath)) {
   fail("opencode.jsonc was not found. Copy the complete bootstrap bundle into the repository first.");
 }
 if (!existsSync(runnerPath)) {
-  fail("scripts/run-opencode.mjs was not found. Copy the complete bootstrap bundle into the repository first.");
+  fail("opencode-scripts/run-opencode.mjs was not found. Copy the complete bootstrap bundle into the repository first.");
 }
 
 const nodeMajor = Number.parseInt(process.versions.node.split(".")[0], 10);
@@ -53,10 +55,10 @@ pkg.private = true;
 pkg.engines = { ...(pkg.engines ?? {}), node: ">=22 <23" };
 pkg.scripts = {
   ...(pkg.scripts ?? {}),
-  opencode: "node ./scripts/run-opencode.mjs",
-  "opencode:version": "node ./scripts/run-opencode.mjs --version",
-  "opencode:paths": "node ./scripts/run-opencode.mjs debug paths",
-  "opencode:config": "node ./scripts/run-opencode.mjs debug config",
+  opencode: "node ./opencode-scripts/run-opencode.mjs",
+  "opencode:version": "node ./opencode-scripts/run-opencode.mjs --version",
+  "opencode:paths": "node ./opencode-scripts/run-opencode.mjs debug paths",
+  "opencode:config": "node ./opencode-scripts/run-opencode.mjs debug config",
 };
 pkg.devDependencies = {
   ...(pkg.devDependencies ?? {}),
@@ -92,4 +94,4 @@ if (verify.error) fail(`OpenCode verification failed to start: ${verify.error.me
 if (verify.status !== 0) fail(`OpenCode verification failed with exit code ${verify.status}`);
 
 console.log("[ok] Local OpenCode installation and restrictive baseline are ready.");
-console.log("[next] Commit package.json, package-lock.json, opencode.jsonc, scripts/, and .gitignore.");
+console.log("[next] Commit package.json, package-lock.json, opencode.jsonc, opencode-scripts/, and .gitignore.");

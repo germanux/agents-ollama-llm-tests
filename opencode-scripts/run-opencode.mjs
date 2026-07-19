@@ -15,7 +15,7 @@ const binary = join(
 );
 
 if (!existsSync(binary)) {
-  console.error("[error] Local OpenCode binary not found. Run: node scripts/setup-opencode.mjs");
+  console.error("[error] Local OpenCode binary not found. Run: node opencode-scripts/setup-opencode.mjs");
   process.exit(1);
 }
 

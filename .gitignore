@@ -27,3 +27,5 @@ replay_pid*
 target/
 .cline-state/
 .cline-runtime/
+node_modules/
+.opencode-runtime/

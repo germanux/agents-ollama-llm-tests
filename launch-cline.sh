@@ -11,7 +11,7 @@ MODEL="ornith-cline-64k"
 # PC      = Ollama del PC grande: 192.168.1.7
 # LOCAL   = Ollama del mismo equipo que ejecuta este script
 # LAPTOP  = Ollama del portátil mediante su IP LAN
-OLLAMA_SERVER="PC"
+OLLAMA_SERVER="LOCAL"
 
 TASK_TIMEOUT_SECONDS=10800
 RETRIES=20

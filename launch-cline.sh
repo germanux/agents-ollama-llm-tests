@@ -38,8 +38,8 @@ BASE_CONFIG_DIR="$PWD/.cline-config"
 CONFIG_DIR="$PWD/.cline-runtime"
 STATE_DIR="$PWD/.cline-state/${OLLAMA_SERVER,,}"
 
-rm -rf "$CONFIG_DIR"
-mkdir -p "$CONFIG_DIR"
+rm -rf "$CONFIG_DIR" "$STATE_DIR"
+mkdir -p "$CONFIG_DIR" "$STATE_DIR"
 
 cp "$BASE_CONFIG_DIR/"*.json "$CONFIG_DIR/"
 

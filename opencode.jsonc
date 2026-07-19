@@ -32,7 +32,7 @@
           "name": "Ornith 35B portátil 16K",
           "limit": {
             "context": 16384,
-            "output": 2048
+            "output": 4096
           }
         }
       }
@@ -53,7 +53,7 @@
           "name": "Ornith 35B PC 64K",
           "limit": {
             "context": 65536,
-            "output": 2048
+            "output": 6144
           }
         }
       }

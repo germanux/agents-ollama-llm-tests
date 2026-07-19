@@ -1,7 +1,7 @@
 ---
 description: Minimal primary agent used only to test the read tool
 mode: primary
-model: ollama/qwen25-coder-opencode-16k
+model: ollama/ornith-opencode-16k
 temperature: 0
 steps: 3
 permission:

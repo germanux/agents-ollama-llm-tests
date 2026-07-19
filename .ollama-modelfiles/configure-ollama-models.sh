@@ -1,19 +1,50 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Por defecto, configura los modelos en el Ollama del PC.
-# Para usar otro servidor, ejecuta:
-# OLLAMA_HOST=http://127.0.0.1:11434 ./configure-ollama-models.sh
-export OLLAMA_HOST="${OLLAMA_HOST:-http://192.168.1.7:11434}"
+# Ejecución directa:
+#   ./configure-ollama-models.sh
+# Configura todos los modelos en el Ollama local.
+#
+# Ejecución remota:
+#   OLLAMA_HOST=http://192.168.1.7:11434 ./configure-ollama-models.sh
+
+export OLLAMA_HOST="${OLLAMA_HOST:-http://127.0.0.1:11434}"
 
 DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-ollama create ornith-cline-64k   -f "$DIR/Modelfile.ornith-cline-64k"
+shopt -s nullglob
+MODELFILES=("$DIR"/Modelfile-*)
 
-ollama create qwen3-30b-direct   -f "$DIR/Modelfile-qwen3-30b-direct"
+if (( ${#MODELFILES[@]} == 0 )); then
+  echo "[error] No se encontraron ficheros Modelfile-* en: $DIR" >&2
+  exit 1
+fi
 
-ollama create qwen3-coder-next-direct   -f "$DIR/Modelfile-qwen3-coder-next-direct"
+ALIASES=()
+
+for modelfile in "${MODELFILES[@]}"; do
+  filename="$(basename -- "$modelfile")"
+  alias="${filename#Modelfile-}"
+
+  if [[ -z "$alias" || "$alias" == "$filename" ]]; then
+    echo "[error] Nombre de Modelfile no válido: $filename" >&2
+    exit 1
+  fi
+
+  echo
+  echo "==> Configurando $alias"
+  echo "    Modelfile: $filename"
+  echo "    Ollama:    $OLLAMA_HOST"
+
+  ollama create "$alias" -f "$modelfile"
+  ALIASES+=("$alias")
+done
 
 echo
 echo "Modelos configurados en $OLLAMA_HOST:"
-ollama list | grep -E 'ornith-cline-64k|qwen3-30b-direct|qwen3-coder-next-direct' || true
+
+for alias in "${ALIASES[@]}"; do
+  ollama list |
+    awk -v model="$alias" \
+      'NR == 1 || $1 == model || $1 == model ":latest"'
+done

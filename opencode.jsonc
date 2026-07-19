@@ -28,8 +28,8 @@
       },
 
       "models": {
-        "ornith-opencode-16k": {
-          "name": "Ornith 35B portátil 16K",
+        "qwen3-30b-coder-16k": {
+          "name": "qwen3-30b-coder-16k portátil 16K",
           "limit": {
             "context": 16384,
             "output": 4096

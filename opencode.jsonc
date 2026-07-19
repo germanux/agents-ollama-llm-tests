@@ -8,9 +8,8 @@
     "ollama-local",
     "ollama-pc"
   ],
-
-  "model": "ollama-local/ornith-opencode-16k",
-  "small_model": "ollama-local/ornith-opencode-16k",
+  "model": "ollama-local/qwen3-30b-coder-16k",
+  "small_model": "ollama-local/qwen3-30b-coder-16k",
 
   "default_agent": "plan",
   "subagent_depth": 0,

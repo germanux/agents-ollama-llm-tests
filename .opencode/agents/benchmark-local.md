@@ -1,7 +1,7 @@
 ---
 description: Complete benchmark using local laptop Ornith 16K
 mode: primary
-model: ollama-local/ornith-opencode-16k
+model: ollama-local/qwen3-30b-coder-16k
 temperature: 0.1
 steps: 100
 

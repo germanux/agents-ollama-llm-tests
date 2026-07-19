@@ -11,7 +11,7 @@
   "model": "ollama-local/qwen3-30b-coder-16k",
   "small_model": "ollama-local/qwen3-30b-coder-16k",
 
-  "default_agent": "plan",
+  "default_agent": "benchmark-pc",
   "subagent_depth": 0,
   "lsp": false,
 
@@ -98,8 +98,8 @@
     "grep": "allow",
     "question": "allow",
 
-    "edit": "deny",
-    "bash": "deny",
+    "edit": "allow",
+    "bash": "allow",
     "task": "deny",
     "skill": "deny",
     "lsp": "deny",

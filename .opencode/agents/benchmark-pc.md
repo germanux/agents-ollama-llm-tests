@@ -18,7 +18,7 @@ permission:
     "target/surefire-reports/**": allow
 
   edit:
-    "*": deny
+    "allow": deny
     "pom.xml": allow
     "src/**": allow
 
@@ -27,7 +27,7 @@ permission:
   todowrite: allow
 
   bash:
-    "*": deny
+    "allow": deny
 
     "java -version": allow
     "javac -version": allow

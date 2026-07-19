@@ -54,8 +54,8 @@ Comprobación:
 test -f AGENTS.md
  test -f BENCHMARK_TASK.md
  test -f opencode.jsonc
- test -f scripts/setup-opencode.mjs
- test -f scripts/run-opencode.mjs
+ test -f opencode-scripts/setup-opencode.mjs
+ test -f opencode-scripts/run-opencode.mjs
 ```
 
 > Los espacios iniciales de los cuatro últimos comandos no son necesarios; pueden ejecutarse sin ellos. Se muestran separados para facilitar la lectura.
@@ -99,7 +99,7 @@ node -p "process.platform + ' ' + process.arch"
 Ejecutar una sola vez después de copiar el bootstrap al repositorio:
 
 ```bash
-node scripts/setup-opencode.mjs
+node opencode-scripts/setup-opencode.mjs
 ```
 
 El script:
@@ -129,8 +129,8 @@ package.json
 package-lock.json
 .gitignore
 opencode.jsonc
-scripts/setup-opencode.mjs
-scripts/run-opencode.mjs
+opencode-scripts/setup-opencode.mjs
+opencode-scripts/run-opencode.mjs
 ```
 
 **EN summary:** The setup creates a pinned, project-local and [reproducible] OpenCode installation.
@@ -226,7 +226,7 @@ npm run opencode -- debug config
 
 ## 3. Aislamiento de OpenCode
 
-`scripts/run-opencode.mjs` crea y usa:
+`opencode-scripts/run-opencode.mjs` crea y usa:
 
 ```text
 .opencode-runtime/
@@ -271,7 +271,7 @@ Usar solamente si el bootstrap o el lockfile necesitan regenerarse:
 
 ```bash
 rm -rf node_modules package-lock.json
-node scripts/setup-opencode.mjs
+node opencode-scripts/setup-opencode.mjs
 ```
 
 Antes de borrar el lockfile, revisar:
@@ -794,7 +794,7 @@ BUILD SUCCESS
 ├── AGENTS.md
 ├── BENCHMARK_TASK.md
 ├── opencode.jsonc
-├── scripts/
+├── opencode-scripts/
 │   ├── setup-opencode.mjs
 │   └── run-opencode.mjs
 ├── .opencode-runtime/          # generado, ignorado

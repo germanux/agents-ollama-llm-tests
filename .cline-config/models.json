@@ -6,6 +6,8 @@
         "name": "Ollama",
         "baseUrl": "http://192.168.1.7:11434",
         "defaultModelId": "ornith-cline-64k",
+        "protocol": "openai-chat",
+        "client": "ai-sdk-community",
         "modelsSourceUrl": "http://192.168.1.7:11434/api/tags"
       },
       "models": {

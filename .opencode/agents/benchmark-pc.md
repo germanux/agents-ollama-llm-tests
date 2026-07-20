@@ -1,7 +1,7 @@
 ---
 description: Complete benchmark using remote PC Ornith 64K
 mode: primary
-model: ollama-pc/ornith-cline-64k
+model: ollama-pc/qwen3-coder-next-direct
 temperature: 0.1
 steps: 100
 
@@ -9,7 +9,7 @@ permission:
   "*": deny
 
   read:
-    "*": deny
+    "*": allow
     "AGENTS.md": allow
     "BENCHMARK_TASK.md": allow
     "notify-success.sh": allow
@@ -18,7 +18,7 @@ permission:
     "target/surefire-reports/**": allow
 
   edit:
-    "*": deny
+    "*": allow
     "pom.xml": allow
     "src/**": allow
 

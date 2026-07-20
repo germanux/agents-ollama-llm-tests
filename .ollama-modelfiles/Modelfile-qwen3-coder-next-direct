@@ -4,6 +4,7 @@ PARAMETER temperature 0.3
 PARAMETER top_p 0.9
 PARAMETER repeat_penalty 1.05
 PARAMETER num_predict 6144
+PARAMETER num_ctx 65536
 
 SYSTEM """
 Responde normalmente en español salvo que se pida otro idioma.

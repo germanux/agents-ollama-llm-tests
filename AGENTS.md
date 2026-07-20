@@ -60,3 +60,14 @@ Recommended milestones:
 - Do not claim success while compilation or any test is failing.
 - Keep reasoning concise and issue the next tool call as soon as the action is clear.
 - Run `./notify-success.sh` only after verified `BUILD SUCCESS`.
+
+## Shell command rules
+
+- Bash is fully available for completing the benchmark.
+- Work only inside the current repository and worktree.
+- Use Maven, Git, pipes, redirections, and standard shell utilities as needed.
+- Prefer direct commands and concise output filters when diagnosing failures.
+- If a compound command fails, run the essential command directly instead of repeating equivalent variants.
+- Do not use sudo, install software, modify system configuration, access unrelated directories, push to remotes, or execute destructive commands outside the current project.
+- Continue autonomously until all required tests pass and Maven reports BUILD SUCCESS.
+- 

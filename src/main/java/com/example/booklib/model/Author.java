@@ -21,19 +21,22 @@ public class Author {
     @Column(nullable = false)
     private String lastName;
 
-    @ManyToMany(mappedBy = "authors", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @Column(nullable = false)
+    private Integer age;
+
+    @ManyToMany(mappedBy = "authors", fetch = FetchType.LAZY)
     private List<Book> books = new ArrayList<>();
 
     // Default constructor for JPA
     public Author() {}
 
     /**
-     * Constructor with id and author details.
+     * Constructor with author details.
      */
-    public Author(Long id, String firstName, String lastName) {
-        this.id = id;
+    public Author(String firstName, String lastName, Integer age) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.age = age;
     }
 
     public Long getId() { return id; }
@@ -45,5 +48,24 @@ public class Author {
     public String getLastName() { return lastName; }
     public void setLastName(String last) { this.lastName = last; }
 
+    public Integer getAge() { return age; }
+    public void setAge(Integer age) { this.age = age; }
+
     public List<Book> getBooks() { return books; }
+
+    /**
+     * Helper method to add a book to this author's collection.
+     */
+    public void addBook(Book book) {
+        this.books.add(book);
+        book.getAuthors().add(this);
+    }
+
+    /**
+     * Helper method to remove a book from this author's collection.
+     */
+    public void removeBook(Book book) {
+        this.books.remove(book);
+        book.getAuthors().remove(this);
+    }
 }

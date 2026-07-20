@@ -26,20 +26,7 @@ permission:
   grep: allow
   todowrite: allow
 
-  bash:
-    "*": deny
-    "java -version": allow
-    "javac -version": allow
-    "mvn *": allow
-    "git status": allow
-    "git status *": allow
-    "git diff": allow
-    "git diff *": allow
-    "git add *": allow
-    "git commit *": allow
-    "git log": allow
-    "git log *": allow
-    "./notify-success.sh": allow
+  bash: allow
 
   question: deny
   task: deny

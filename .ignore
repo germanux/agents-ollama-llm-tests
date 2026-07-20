@@ -1,0 +1,29 @@
+# OpenCode: infraestructura del harness, no contenido de la tarea
+.opencode/
+.opencode-runtime/
+opencode.jsonc
+opencode-scripts/
+package.json
+package-lock.json
+README.md
+README-OPENCODE-STEP1.md
+
+# Cline y otros harnesses
+.cline-config/
+.cline-runtime/
+.cline-state/
+cline-laptop-remote/
+launch-cline.sh
+
+# Metadatos y configuración
+.git/
+.gitignore
+.ignore
+.idea/
+*.iml
+LICENSE
+
+# Dependencias, resultados y logs
+node_modules/
+target/
+*.log

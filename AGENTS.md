@@ -37,6 +37,15 @@
 - Keep required `flush()` and `clear()` persistence checks.
 - Stop only after `BUILD SUCCESS` or a genuine environment blocker.
 
+
+# Performance
+
+Keep reasoning concise.
+Do not spend the entire response planning.
+Emit the next required tool call as soon as the action is clear.
+Do not attempt to generate the complete project in a single response.
+Use one or a small number of file edits per step.
+
 ## Git
 
 Create commits for coherent milestones:

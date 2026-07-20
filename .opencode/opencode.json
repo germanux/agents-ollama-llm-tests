@@ -9,6 +9,13 @@
         "timeout": 600000
       },
       "models": {
+        "ornith-cline-64k": {
+          "name": "ornith-cline-64k",
+          "limit": {
+            "context": 65536,
+            "output": 6144
+          }
+        },
         "ornith-opencode-16k": {
           "name": "ornith-opencode-16k",
           "limit": {
@@ -29,6 +36,13 @@
             "context": 16384,
             "output": 4096
           }
+        },
+        "qwen3-coder-next-direct": {
+          "name": "qwen3-coder-next-direct",
+          "limit": {
+            "context": 65536,
+            "output": 6144
+          }
         }
       }
     },
@@ -40,15 +54,12 @@
         "timeout": 600000
       },
       "models": {
-        "ornith-cline-64k": {
-          "name": "ornith-cline-64k",
+        "qwen3-coder-next-direct": {
+          "name": "qwen3-coder-next-direct",
           "limit": {
             "context": 65536,
             "output": 6144
           }
-        },
-        "qwen3-coder-next-direct": {
-          "name": "qwen3-coder-next-direct"
         }
       }
     }

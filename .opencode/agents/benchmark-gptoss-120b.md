@@ -96,3 +96,17 @@ test results and Git state, and continue until all benchmark requirements are me
 Do not stop after creating pom.xml.
 Do not provide a final response while any required source file, test, Git checkpoint
 or verification step is missing.
+
+When an action requires a tool, invoke the native OpenCode tool directly.
+
+Never print tool arguments, JSON objects, XML tool syntax or pseudo-tool calls
+as assistant text.
+
+For file creation, call the write tool with:
+- a relative filePath inside the current repository;
+- the complete content argument.
+
+Do not use absolute file paths in write or edit calls.
+
+After every successful tool result, continue with the next required action.
+A JSON object shown as plain text is not a tool call and is a failure.

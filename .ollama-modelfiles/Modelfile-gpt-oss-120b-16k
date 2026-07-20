@@ -1,0 +1,6 @@
+FROM gpt-oss:120b
+
+PARAMETER num_ctx 16384
+PARAMETER num_predict 6144
+PARAMETER temperature 1.0
+PARAMETER top_p 1.0

@@ -3,7 +3,7 @@ description: Complete benchmark with local Qwen3-Coder 30B
 mode: primary
 model: ollama-local/qwen3-30b-coder-16k
 steps: 100
-
+temperature: 0.1
 permission:
   "*": deny
 

@@ -1,15 +1,14 @@
 ---
-description: Complete benchmark using remote PC Ornith 64K
+description: Complete benchmark with remote Qwen3-Coder-Next 80B
 mode: primary
 model: ollama-pc/qwen3-coder-next-direct
-temperature: 0.1
-steps: 100
+steps: 120
 
 permission:
   "*": deny
 
   read:
-    "*": allow
+    "*": deny
     "AGENTS.md": allow
     "BENCHMARK_TASK.md": allow
     "notify-success.sh": allow
@@ -18,7 +17,7 @@ permission:
     "target/surefire-reports/**": allow
 
   edit:
-    "*": allow
+    "*": deny
     "pom.xml": allow
     "src/**": allow
 
@@ -28,11 +27,9 @@ permission:
 
   bash:
     "*": deny
-
     "java -version": allow
     "javac -version": allow
     "mvn *": allow
-
     "git status": allow
     "git status *": allow
     "git diff": allow
@@ -41,7 +38,6 @@ permission:
     "git commit *": allow
     "git log": allow
     "git log *": allow
-
     "./notify-success.sh": allow
 
   question: deny
@@ -53,31 +49,13 @@ permission:
   external_directory: deny
 ---
 
-Read AGENTS.md and BENCHMARK_TASK.md completely before acting.
+Read AGENTS.md and BENCHMARK_TASK.md completely, then execute the benchmark autonomously.
 
-Execute the complete benchmark autonomously.
+Use tools to act; do not describe commands that you can execute.
+Work only on pom.xml and src/**, except for reading the permitted benchmark files and Maven test reports.
+Do not inspect harness, IDE, Node, OpenCode, Cline, README, license, or external files.
+Do not ask questions, browse, install software, or download anything.
 
-Only inspect these benchmark resources:
-- AGENTS.md
-- BENCHMARK_TASK.md
-- pom.xml
-- src/**
-- target/surefire-reports/** when test diagnostics require it
-- notify-success.sh
-
-Do not inspect OpenCode, Cline, Node, README, license or harness bootstrap files.
-
-Work only inside the current repository.
-Respect every restriction in AGENTS.md and BENCHMARK_TASK.md.
-Do not ask for confirmation.
-Do not access the web or external directories.
-Do not use sudo, package managers or download commands.
-
-Use the installed Java 21, javac and Maven.
-Create pom.xml and the required files under src/.
-Run mvn test.
-Diagnose and correct failures.
-Continue until mvn test reports BUILD SUCCESS or a genuine environmental blocker is proven.
-Do not claim success without real Maven output.
-Create the required Git commits.
-Run ./notify-success.sh only after BUILD SUCCESS.
+Follow the small-batch workflow and Git checkpoints in AGENTS.md.
+Continue until `mvn test` prints `BUILD SUCCESS`, or report a proven environmental blocker with exact command output.
+Run `./notify-success.sh` only after verified success.

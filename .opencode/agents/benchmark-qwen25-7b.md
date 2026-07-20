@@ -49,31 +49,6 @@ Continue until `mvn test` prints `BUILD SUCCESS`, or report a proven environment
 Run `./notify-success.sh` only after verified success.
 
 TOOL-CALLING PROTOCOL — STRICT REQUIREMENTS
-
-Tool calls are protocol messages, not normal assistant content.
-
-When an action requires a tool:
-- emit a native tool call using exactly the tool schema supplied by the runtime;
-- use the exact tool name and exact argument names;
-- provide valid arguments with the required types;
-- do not invent fields or tool names.
-
-Never print, describe, simulate or reproduce a tool call as normal text.
-
-In particular, never place any of the following in assistant content:
-- JSON representing a tool call;
-- XML or <tool_call> markup;
-- Markdown code blocks containing tool arguments;
-- prose such as "I will call the read tool with...".
-
-Do not manually serialize tool calls.
-
-After a tool result is returned, inspect it and continue with the next native tool call or the final answer.
-
-If a tool call is rejected:
-- inspect the error;
-- correct only the invalid tool name or arguments;
-- do not repeat the same malformed call;
-- do not claim that all tools are unavailable unless the runtime explicitly proves it.
-
-Continue executing the benchmark until BUILD SUCCESS or until a genuine blocking condition is demonstrated with concrete tool output.
+Use the runtime-provided tools whenever required.
+Follow exactly the tool-call format defined by the model template and runtime.
+Do not describe intended tool calls in prose.

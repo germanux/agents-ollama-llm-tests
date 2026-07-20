@@ -34,18 +34,48 @@ case "$OLLAMA_SERVER" in
     ;;
 esac
 
+JAVA21_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
+
+if [ ! -x "$JAVA21_HOME/bin/java" ]; then
+  echo "[error] Java 21 no existe en $JAVA21_HOME"
+  ls -la /usr/lib/jvm
+  exit 1
+fi
+
+export JAVA_HOME="$JAVA21_HOME"
+export PATH="$JAVA_HOME/bin:$PATH"
+hash -r
+
+echo "[java] JAVA_HOME=$JAVA_HOME"
+java -version
+javac -version
+mvn -version
+
 BASE_CONFIG_DIR="$PWD/.cline-config"
 CONFIG_DIR="$PWD/.cline-runtime"
 STATE_DIR="$PWD/.cline-state/${OLLAMA_SERVER,,}"
 
-rm -rf "$CONFIG_DIR" "$STATE_DIR"
-mkdir -p "$CONFIG_DIR" "$STATE_DIR"
+rm -rf  "$STATE_DIR"
+mkdir -p "$STATE_DIR"
+rm -rf "$CONFIG_DIR"
+mkdir -p "$CONFIG_DIR"
 
 cp "$BASE_CONFIG_DIR/"*.json "$CONFIG_DIR/"
 
 sed -E -i \
   "s#http://[^\"/]+:11434#$OLLAMA_URL#g" \
   "$CONFIG_DIR/providers.json" \
+  "$CONFIG_DIR/models.json"
+
+jq '
+  .providers.ollama.models["ornith-cline-64k"] += {
+    "contextWindow": 65536,
+    "maxInputTokens": 65536
+  }
+' "$CONFIG_DIR/models.json" > "$CONFIG_DIR/models.json.tmp" &&
+mv "$CONFIG_DIR/models.json.tmp" "$CONFIG_DIR/models.json"
+
+jq '.providers.ollama.models["ornith-cline-64k"]' \
   "$CONFIG_DIR/models.json"
 
 export NVM_DIR="$HOME/.nvm"
@@ -58,6 +88,12 @@ echo "[config] settings=$CONFIG_DIR state=$STATE_DIR"
 
 echo ">>> Inicio CLINE: $(date '+%d/%m/%Y %H:%M:%S %Z')"
 trap 'echo ">>> Fin CLINE:    $(date "+%d/%m/%Y %H:%M:%S %Z")"' EXIT
+
+jq -c '.providers.ollama.settings | {baseUrl,model,timeout,contextWindow,protocol,client}' \
+  "$CONFIG_DIR/providers.json"
+
+
+
 
 CLINE_SESSION_BACKEND_MODE=local \
 cline \

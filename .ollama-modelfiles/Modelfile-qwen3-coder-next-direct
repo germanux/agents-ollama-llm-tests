@@ -1,15 +1,9 @@
 FROM qwen3-coder-next:latest
 
-PARAMETER temperature 0.3
-PARAMETER top_p 0.9
-PARAMETER repeat_penalty 1.05
+PARAMETER num_ctx 65536
 PARAMETER num_predict 6144
 
-SYSTEM """
-Responde normalmente en español salvo que se pida otro idioma.
-Sé claro, técnico y útil.
-Evita divagar si la pregunta es simple.
-Si la tarea es técnica, estructura la respuesta en pasos o puntos.
-No inventes datos: si no sabes algo, dilo.
-No uses emojis salvo que el usuario los pida.
-"""
+# Official Qwen3-Coder-Next sampling recommendations.
+PARAMETER temperature 1.0
+PARAMETER top_p 0.95
+PARAMETER top_k 40

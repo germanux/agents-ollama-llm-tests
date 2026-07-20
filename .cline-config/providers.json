@@ -10,7 +10,7 @@
         "client": "ai-sdk-community",
         "baseUrl": "http://192.168.1.7:11434",
         "timeout": 600000,
-        "contextWindow": 32768,
+        "contextWindow": 65536,
         "reasoning": {
           "enabled": false
         }

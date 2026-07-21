@@ -28,6 +28,7 @@ target/
 .cline-state/
 .cline-runtime/
 node_modules/
+node_modules
 .opencode-runtime/
 
 .angular/

@@ -37,6 +37,16 @@ permission:
   external_directory: deny
 ---
 
+## Shell command rules
+
+- Bash is fully available for completing the benchmark.
+- Work only inside the current repository and worktree.
+- Use Maven, Git, pipes, redirections, and standard shell utilities as needed.
+- Prefer direct commands and concise output filters when diagnosing failures.
+- If a compound command fails, run the essential command directly instead of repeating equivalent variants.
+- Do not use sudo, install software, modify system configuration, access unrelated directories, push to remotes, or execute destructive commands outside the current project.
+- Continue autonomously until all required tests pass and Maven reports BUILD SUCCESS.
+
 Read AGENTS.md and BENCHMARK_TASK.md completely, then execute the benchmark autonomously.
 
 Use tools to act; do not describe commands that you can execute.

@@ -9,8 +9,8 @@
     "ollama-pc"
   ],
 
-  "model": "ollama-pc/gpt-oss-120b-16k",
-  "small_model": "ollama-pc/gpt-oss-120b-16k",
+  "model": "ollama-pc/qwen36-35b-16k",
+  "small_model": "ollama-pc/qwen36-35b-16k",
   "default_agent": "plan",
   "subagent_depth": 0,
   "lsp": false,

@@ -3,7 +3,7 @@ description: Complete benchmark with remote Qwen3-Coder-Next 80B
 mode: primary
 model: ollama-pc/qwen3-coder-next-direct
 steps: 120
-temperature: 0.1
+temperature: 0.2
 
 permission:
   "*": deny

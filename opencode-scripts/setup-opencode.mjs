@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
-const root = resolve(process.cwd());
-const version = process.env.OPENCODE_VERSION ?? "1.18.3";
-const packagePath = join(root, "package.json");
-const configPath = join(root, "opencode.jsonc")
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const root = resolve(scriptDir, "..");
+const rootDir = resolve(scriptDir, "..");
+
+const version = process.env.OPENCODE_VERSION ?? "1.18.3";
+const packagePath = join(rootDir, "package.json");
+const configPath = join(rootDir, "opencode.jsonc");
 const runnerPath = join(scriptDir, "run-opencode.mjs");
-const gitignorePath = join(root, ".gitignore");
+const gitignorePath = join(rootDir, ".gitignore");
 
 function fail(message) {
   console.error(`[error] ${message}`);
@@ -21,8 +22,8 @@ function npmCommand() {
   return process.platform === "win32" ? "npm.cmd" : "npm";
 }
 
-if (!existsSync(join(root, "AGENTS.md"))) {
-  fail("Run this script from the repository root; AGENTS.md was not found.");
+if (!existsSync(join(rootDir, "AGENTS.md"))) {
+  fail("Run this script from the repository rootDir; AGENTS.md was not found.");
 }
 if (!existsSync(configPath)) {
   fail("opencode.jsonc was not found. Copy the complete bootstrap bundle into the repository first.");
@@ -80,7 +81,7 @@ console.log(`[setup] Installing opencode-ai@${version} locally...`);
 const install = spawnSync(
   npmCommand(),
   ["install", "--save-dev", "--save-exact", `opencode-ai@${version}`],
-  { cwd: root, stdio: "inherit", env: process.env },
+  { cwd: rootDir, stdio: "inherit", env: process.env },
 );
 if (install.error) fail(`npm install failed to start: ${install.error.message}`);
 if (install.status !== 0) fail(`npm install failed with exit code ${install.status}`);
@@ -88,7 +89,7 @@ if (install.status !== 0) fail(`npm install failed with exit code ${install.stat
 const verify = spawnSync(
   process.execPath,
   [runnerPath, "--version"],
-  { cwd: root, stdio: "inherit", env: process.env },
+  { cwd: rootDir, stdio: "inherit", env: process.env },
 );
 if (verify.error) fail(`OpenCode verification failed to start: ${verify.error.message}`);
 if (verify.status !== 0) fail(`OpenCode verification failed with exit code ${verify.status}`);

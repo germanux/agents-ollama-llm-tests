@@ -5,10 +5,10 @@ import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const root = resolve(scriptDir, "..");
-const runtime = join(root, ".opencode-runtime");
+const rootDir = resolve(scriptDir, "..");
+const runtime = join(rootDir, ".opencode-runtime");
 const binary = join(
-  root,
+    rootDir,
   "node_modules",
   ".bin",
   process.platform === "win32" ? "opencode.cmd" : "opencode",
@@ -25,7 +25,7 @@ for (const directory of ["config", "data", "cache", "state"]) {
 
 const env = {
   ...process.env,
-  OPENCODE_CONFIG: join(root, "opencode.jsonc"),
+  OPENCODE_CONFIG: join(rootDir, "opencode.jsonc"),
   OPENCODE_DISABLE_CLAUDE_CODE: "1",
   OPENCODE_DISABLE_LSP_DOWNLOAD: "true",
   XDG_CONFIG_HOME: join(runtime, "config"),
@@ -35,7 +35,7 @@ const env = {
 };
 
 const child = spawn(binary, process.argv.slice(2), {
-  cwd: root,
+  cwd: rootDir,
   env,
   stdio: "inherit",
   shell: process.platform === "win32",

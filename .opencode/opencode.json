@@ -57,6 +57,13 @@
             "context": 65536,
             "output": 6144
           }
+        },
+        "qwen36-35b-16k": {
+          "name": "qwen36-35b-16k",
+          "limit": {
+            "context": 16384,
+            "output": 4096
+          }
         }
       }
     },
@@ -115,6 +122,13 @@
           "limit": {
             "context": 65536,
             "output": 6144
+          }
+        },
+        "qwen36-35b-16k": {
+          "name": "qwen36-35b-16k",
+          "limit": {
+            "context": 16384,
+            "output": 4096
           }
         }
       }

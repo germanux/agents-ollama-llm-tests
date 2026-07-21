@@ -5,7 +5,6 @@ MODEL="qwen3-coder-next:latest"
 CONTEXT="64K"
 OUTPUT="6K"
 TEMPERATURE=0.1
-OPENCODE_HOST="PC"
 OLLAMA_SERVER="PC"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,6 +12,21 @@ REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 BASE_BRANCH="main"
 SOURCE_AGENT_REL=".opencode/agents/benchmark-pc.md"
 CONFIGURE_SCRIPT_REL=".ollama-modelfiles/configure-ollama-models.sh"
+
+HOSTNAME_SHORT="$(hostname -s)"
+
+case "$HOSTNAME_SHORT" in
+  PC-GIGA-ZORUX)
+    OPENCODE_HOST="PC"
+    ;;
+  PC-ASUS-ZORIN)
+    OPENCODE_HOST="LP"
+    ;;
+  *)
+    echo "Host no reconocido: $HOSTNAME_SHORT" >&2
+    exit 1
+    ;;
+esac
 
 normalize_machine() {
   case "${1^^}" in

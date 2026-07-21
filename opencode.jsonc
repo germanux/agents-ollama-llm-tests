@@ -9,8 +9,8 @@
     "ollama-pc"
   ],
 
-  "model": "ollama-pc/qwen36-35b-16k",
-  "small_model": "ollama-pc/qwen36-35b-16k",
+  "model": "ollama-pc/qwen36-35b-32k",
+  "small_model": "ollama-pc/qwen36-35b-32k",
   "default_agent": "plan",
   "subagent_depth": 0,
   "lsp": false,

@@ -1,7 +1,7 @@
 ---
-description: Complete benchmark with PC remote qwen36-35b-16k
+description: Complete benchmark with PC remote qwen36-35b-32k
 mode: primary
-model: ollama-pc/qwen36-35b-16k
+model: ollama-pc/qwen36-35b-32k
 steps: 100
 temperature: 0.1
 

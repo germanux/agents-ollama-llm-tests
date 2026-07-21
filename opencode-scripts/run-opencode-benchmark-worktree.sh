@@ -37,7 +37,7 @@ normalize_machine() {
       printf 'LP'
       ;;
     *)
-      echo "OPENCODE_HOST y OLLAMA_SERVER deben ser PC o LP." >&2
+      echo "OLLAMA_SERVER debe ser PC o LP." >&2
       exit 1
       ;;
   esac
@@ -120,20 +120,74 @@ AGENT_REL=".opencode/agents/${AGENT_NAME}.md"
 MODELFILE_REL=".ollama-modelfiles/Modelfile-${ALIAS}"
 
 cd "$REPO_ROOT"
-mkdir -p "$WORKTREE_BASE"
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "La rama main tiene cambios sin confirmar. Déjala limpia antes de ejecutar la prueba." >&2
+# La carpeta de worktrees está dentro del repositorio principal, pero no forma
+# parte de su contenido versionado.
+EXCLUDE_FILE="$(git rev-parse --git-path info/exclude)"
+mkdir -p "$(dirname "$EXCLUDE_FILE")"
+touch "$EXCLUDE_FILE"
+if ! grep -qxF "/agents-harness-benchmark/" "$EXCLUDE_FILE"; then
+  printf '\n/agents-harness-benchmark/\n' >> "$EXCLUDE_FILE"
+fi
+
+# Todas las validaciones se hacen antes de crear rama o worktree.
+CURRENT_BRANCH="$(git branch --show-current)"
+if [[ "$CURRENT_BRANCH" != "$BASE_BRANCH" ]]; then
+  echo "Ejecuta el script desde la rama $BASE_BRANCH. Rama actual: ${CURRENT_BRANCH:-DETACHED}." >&2
   exit 1
 fi
 
-if ! git rev-parse --verify --quiet "$BASE_BRANCH" >/dev/null; then
-  echo "No existe la rama base $BASE_BRANCH." >&2
+if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
+  echo "La rama $BASE_BRANCH tiene cambios sin confirmar. Déjala limpia antes de ejecutar la prueba." >&2
   exit 1
 fi
+
+if ! git rev-parse --verify --quiet "${BASE_BRANCH}^{commit}" >/dev/null; then
+  echo "La rama base $BASE_BRANCH no existe o todavía no tiene ningún commit." >&2
+  exit 1
+fi
+
+if [[ ! -f "$REPO_ROOT/$SOURCE_AGENT_REL" ]]; then
+  echo "No existe el agente base $SOURCE_AGENT_REL." >&2
+  exit 1
+fi
+
+if [[ ! -f "$REPO_ROOT/$CONFIGURE_SCRIPT_REL" ]]; then
+  echo "No existe $CONFIGURE_SCRIPT_REL." >&2
+  exit 1
+fi
+
+if [[ ! -f "$REPO_ROOT/opencode.jsonc" ]]; then
+  echo "No existe opencode.jsonc." >&2
+  exit 1
+fi
+
+if [[ ! -f "$REPO_ROOT/package.json" ]]; then
+  echo "No existe package.json." >&2
+  exit 1
+fi
+
+if [[ ! -f "$REPO_ROOT/opencode-scripts/run-opencode.mjs" ]]; then
+  echo "No existe opencode-scripts/run-opencode.mjs." >&2
+  exit 1
+fi
+
+command -v python3 >/dev/null 2>&1 || {
+  echo "No se encuentra python3." >&2
+  exit 1
+}
+
+command -v npm >/dev/null 2>&1 || {
+  echo "No se encuentra npm." >&2
+  exit 1
+}
+
+# Elimina únicamente registros de worktrees cuyas carpetas ya no existen.
+git worktree prune --verbose
 
 if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
   echo "Ya existe la rama $BRANCH." >&2
+  echo "Revísala con: git worktree list" >&2
   exit 1
 fi
 
@@ -142,20 +196,43 @@ if [[ -e "$WORKTREE_DIR" ]]; then
   exit 1
 fi
 
-# Primera modificación: crear el worktree limpio desde main.
+mkdir -p "$WORKTREE_BASE"
+
+SETUP_COMPLETE=0
+
+rollback_failed_setup() {
+  local status=$?
+  trap - EXIT
+
+  if [[ "$status" -ne 0 && "$SETUP_COMPLETE" -eq 0 ]]; then
+    echo "La preparación falló; eliminando rama y worktree incompletos..." >&2
+
+    cd "$REPO_ROOT"
+
+    git worktree remove --force "$WORKTREE_DIR" 2>/dev/null || true
+
+    # Si git worktree add dejó una carpeta parcial, sabemos que no existía
+    # antes de esta ejecución y puede eliminarse con seguridad.
+    if [[ -e "$WORKTREE_DIR" ]]; then
+      rm -rf -- "$WORKTREE_DIR"
+    fi
+
+    git worktree prune --verbose 2>/dev/null || true
+
+    if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+      git branch -D "$BRANCH" 2>/dev/null || true
+    fi
+  fi
+
+  exit "$status"
+}
+
+# Desde aquí, cualquier fallo de preparación revierte rama y worktree.
+trap rollback_failed_setup EXIT
+
 git worktree add -b "$BRANCH" "$WORKTREE_DIR" "$BASE_BRANCH"
 
 cd "$WORKTREE_DIR"
-
-if [[ ! -f "$SOURCE_AGENT_REL" ]]; then
-  echo "No existe el agente base $SOURCE_AGENT_REL." >&2
-  exit 1
-fi
-
-if [[ ! -f "$CONFIGURE_SCRIPT_REL" ]]; then
-  echo "No existe $CONFIGURE_SCRIPT_REL." >&2
-  exit 1
-fi
 
 chmod +x "$CONFIGURE_SCRIPT_REL"
 mkdir -p "$(dirname "$AGENT_REL")" "$(dirname "$MODELFILE_REL")"
@@ -284,7 +361,16 @@ git add -f \
   ".opencode/opencode.json" \
   "opencode.jsonc"
 
-git commit -m "Configure benchmark ${RUN_NAME}"
+if git diff --cached --quiet; then
+  echo "La configuración no produjo cambios; no se crea commit inicial."
+else
+  git commit -m "Configure benchmark ${RUN_NAME}"
+fi
+
+# La preparación ha terminado correctamente. Desde aquí se conserva el
+# worktree aunque falle OpenCode, para poder inspeccionar código y logs.
+SETUP_COMPLETE=1
+trap - EXIT
 
 STAMP="$(date '+%Y%m%d-%H%M%S')"
 LOG="opencode-${RUN_NAME}-${STAMP}.log"

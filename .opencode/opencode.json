@@ -12,8 +12,8 @@
         "gpt-oss-120b-16k": {
           "name": "gpt-oss-120b-16k",
           "limit": {
-            "context": 16384,
-            "output": 6144
+            "context": 24576,
+            "output": 4096
           }
         },
         "ornith-cline-64k": {

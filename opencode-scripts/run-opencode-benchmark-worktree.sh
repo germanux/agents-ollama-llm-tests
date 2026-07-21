@@ -98,7 +98,7 @@ case "$OLLAMA_SERVER" in
     fi
     ;;
   LP)
-    PROVIDER="ollama-lp"
+    PROVIDER="ollama-local"
     PROVIDER_NAME="Ollama Laptop"
 
     if [[ "$OPENCODE_HOST" == "LP" ]]; then

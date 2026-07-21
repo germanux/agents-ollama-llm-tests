@@ -4,7 +4,7 @@ set -euo pipefail
 MODEL="qwen3-coder:30B"
 CONTEXT="32K"
 OUTPUT="4K"
-TEMPERATURE=0.3
+TEMPERATURE=0.1
 OLLAMA_SERVER="LP"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

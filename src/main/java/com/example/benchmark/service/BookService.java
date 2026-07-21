@@ -1,5 +1,6 @@
 package com.example.benchmark.service;
 
+import com.example.benchmark.dto.BookCreateDto;
 import com.example.benchmark.entity.Author;
 import com.example.benchmark.entity.Book;
 import com.example.benchmark.repo.AuthorRepository;
@@ -35,5 +36,39 @@ public class BookService {
         return books.stream()
                 .map(Book::getTitle)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Book persistBookWithAuthorIds(BookCreateDto dto) {
+        List<Author> authors = authorRepository.findAllById(dto.authorIds());
+        
+        if (authors.size() != dto.authorIds().size()) {
+            throw new IllegalArgumentException("One or more author IDs not found");
+        }
+        
+        Book book = new Book(dto.title(), dto.description());
+        for (Author author : authors) {
+            book.addAuthor(author);
+        }
+        bookRepository.save(book);
+        return book;
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getBookTitlesByAuthorIdWithValidation(Long authorId) {
+        if (!authorRepository.existsById(authorId)) {
+            throw new IllegalArgumentException("Author not found with ID: " + authorId);
+        }
+        return getBookTitlesByAuthorId(authorId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Book> getBooksByAuthorId(Long authorId) {
+        return bookRepository.findByAuthorsId(authorId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Book> findAllBooks() {
+        return bookRepository.findAll();
     }
 }

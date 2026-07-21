@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MODEL="qwen3-coder-next:latest"
-CONTEXT="64K"
-OUTPUT="6K"
+MODEL="qwen3-coder:30B"
+CONTEXT="32K"
+OUTPUT="4K"
 TEMPERATURE=0.3
-OLLAMA_SERVER="PC"
+OLLAMA_SERVER="LP"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"

@@ -6,14 +6,13 @@ opencode-scripts/
 package.json
 package-lock.json
 README.md
-README-OPENCODE-STEP1.md
 
 # Cline y otros harnesses
 .cline-config/
 .cline-runtime/
 .cline-state/
 cline-laptop-remote/
-launch-cline.sh
+cline-laptop-remote/launch-cline.sh
 
 # Metadatos y configuración
 .git/
@@ -27,3 +26,5 @@ LICENSE
 node_modules/
 target/
 *.log
+
+.angular/

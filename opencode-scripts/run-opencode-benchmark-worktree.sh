@@ -2,7 +2,7 @@
 set -euo pipefail
 
 MODEL="qwen3-coder:30B"
-CONTEXT="24K"
+CONTEXT="20K"
 OUTPUT="4K"
 TEMPERATURE=0.2
 OLLAMA_SERVER="LP"

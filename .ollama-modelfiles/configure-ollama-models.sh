@@ -120,7 +120,8 @@ for modelfile in sorted(modelfiles, key=lambda path: path.name):
     num_predict = read_integer_parameter(text, "num_predict")
 
     model_config = {
-        "name": alias
+        "name": alias,
+        "temperature": True,
     }
 
     if (num_ctx is None) != (num_predict is None):

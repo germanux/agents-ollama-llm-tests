@@ -54,7 +54,6 @@ The service must:
 - Use exactly one owning side with `@JoinTable`; prefer `Book` as the owning side.
 - Maintain both Java-side collections through helper methods such as `book.addAuthor(author)`.
 - Do not use `CascadeType.ALL`.
-- Do not add REST controllers or Lombok.
 - Keep the design minimal; no DTOs, mappers, extra domain layers, or unrelated utilities are required.
 
 ## Required tests

@@ -10,8 +10,10 @@ OLLAMA_SERVER="LP"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 BASE_BRANCH="main"
+
 SOURCE_AGENT_REL=".opencode/agents/benchmark-pc.md"
 CONFIGURE_SCRIPT_REL=".ollama-modelfiles/configure-ollama-models.sh"
+RUNNER_REL="opencode-scripts/run-opencode.mjs"
 
 HOSTNAME_SHORT="$(hostname -s)"
 
@@ -37,7 +39,7 @@ normalize_machine() {
       printf 'LP'
       ;;
     *)
-      echo "OPENCODE_HOST y OLLAMA_SERVER deben ser PC o LP." >&2
+      echo "OLLAMA_SERVER debe ser PC o LP." >&2
       exit 1
       ;;
   esac
@@ -113,25 +115,89 @@ RUN_NAME="${MODEL_NAME}-${TEMP_TAG}-${CONTEXT_TAG}-${OUTPUT_TAG}-${HOST_TAG}"
 
 ALIAS="$RUN_NAME"
 BRANCH="benchmark/${RUN_NAME}"
-WORKTREE_DIR="$(dirname "$REPO_ROOT")/${RUN_NAME}"
+
+# El worktree se crea DENTRO del propio repositorio.
+WORKTREE_BASE="$REPO_ROOT/agents-harness-benchmark"
+WORKTREE_DIR="$WORKTREE_BASE/$RUN_NAME"
+
 AGENT_NAME="$RUN_NAME"
 AGENT_REL=".opencode/agents/${AGENT_NAME}.md"
 MODELFILE_REL=".ollama-modelfiles/Modelfile-${ALIAS}"
 
 cd "$REPO_ROOT"
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "La rama main tiene cambios sin confirmar. Déjala limpia antes de ejecutar la prueba." >&2
+# Evita que la carpeta interna de worktrees ensucie el estado de main.
+EXCLUDE_FILE="$(git rev-parse --git-path info/exclude)"
+mkdir -p "$(dirname "$EXCLUDE_FILE")"
+touch "$EXCLUDE_FILE"
+
+if ! grep -qxF "/agents-harness-benchmark/" "$EXCLUDE_FILE"; then
+  printf '\n/agents-harness-benchmark/\n' >> "$EXCLUDE_FILE"
+fi
+
+# ---------------------------------------------------------------------------
+# PREFLIGHT: todo se comprueba ANTES de crear rama o worktree.
+# ---------------------------------------------------------------------------
+
+CURRENT_BRANCH="$(git branch --show-current)"
+
+if [[ "$CURRENT_BRANCH" != "$BASE_BRANCH" ]]; then
+  echo "Ejecuta el script desde la rama $BASE_BRANCH. Rama actual: ${CURRENT_BRANCH:-DETACHED}." >&2
   exit 1
 fi
 
-if ! git rev-parse --verify --quiet "$BASE_BRANCH" >/dev/null; then
-  echo "No existe la rama base $BASE_BRANCH." >&2
+if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
+  echo "La rama $BASE_BRANCH tiene cambios sin confirmar. Déjala limpia antes de ejecutar la prueba." >&2
   exit 1
 fi
+
+if ! git rev-parse --verify --quiet "${BASE_BRANCH}^{commit}" >/dev/null; then
+  echo "La rama base $BASE_BRANCH no existe o todavía no tiene ningún commit." >&2
+  exit 1
+fi
+
+for required_file in \
+  "$SOURCE_AGENT_REL" \
+  "$CONFIGURE_SCRIPT_REL" \
+  "$RUNNER_REL" \
+  "opencode.jsonc" \
+  "package.json"
+do
+  if [[ ! -f "$REPO_ROOT/$required_file" ]]; then
+    echo "No existe $required_file en $REPO_ROOT." >&2
+    exit 1
+  fi
+done
+
+command -v python3 >/dev/null 2>&1 || {
+  echo "No se encuentra python3." >&2
+  exit 1
+}
+
+command -v npm >/dev/null 2>&1 || {
+  echo "No se encuentra npm." >&2
+  exit 1
+}
+
+# setup-opencode.mjs instala OpenCode en node_modules del worktree principal.
+# Un worktree nuevo no contiene node_modules porque está ignorado por Git.
+MAIN_NODE_MODULES="$REPO_ROOT/node_modules"
+MAIN_OPENCODE_BIN="$MAIN_NODE_MODULES/.bin/opencode"
+
+if [[ ! -d "$MAIN_NODE_MODULES" || ! -x "$MAIN_OPENCODE_BIN" ]]; then
+  echo "No se encuentra la instalación local de OpenCode en:" >&2
+  echo "  $MAIN_OPENCODE_BIN" >&2
+  echo "Ejecuta primero, desde main:" >&2
+  echo "  node opencode-scripts/setup-opencode.mjs" >&2
+  exit 1
+fi
+
+# Limpia registros de carpetas que fueron borradas manualmente.
+git worktree prune --verbose
 
 if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
   echo "Ya existe la rama $BRANCH." >&2
+  echo "Comprueba su worktree con: git worktree list" >&2
   exit 1
 fi
 
@@ -140,18 +206,51 @@ if [[ -e "$WORKTREE_DIR" ]]; then
   exit 1
 fi
 
-# Primera modificación: crear el worktree limpio desde main.
+mkdir -p "$WORKTREE_BASE"
+
+# ---------------------------------------------------------------------------
+# CREACIÓN TRANSACCIONAL
+# ---------------------------------------------------------------------------
+
+SETUP_COMPLETE=0
+
+rollback_failed_setup() {
+  local status=$?
+  trap - EXIT
+
+  if [[ "$status" -ne 0 && "$SETUP_COMPLETE" -eq 0 ]]; then
+    echo "La preparación falló; eliminando rama y worktree incompletos..." >&2
+
+    cd "$REPO_ROOT"
+
+    git worktree remove --force "$WORKTREE_DIR" 2>/dev/null || true
+
+    if [[ -e "$WORKTREE_DIR" ]]; then
+      rm -rf -- "$WORKTREE_DIR"
+    fi
+
+    git worktree prune --verbose 2>/dev/null || true
+
+    if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+      git branch -D "$BRANCH" 2>/dev/null || true
+    fi
+  fi
+
+  exit "$status"
+}
+
+trap rollback_failed_setup EXIT
+
 git worktree add -b "$BRANCH" "$WORKTREE_DIR" "$BASE_BRANCH"
 
 cd "$WORKTREE_DIR"
 
-if [[ ! -f "$SOURCE_AGENT_REL" ]]; then
-  echo "No existe el agente base $SOURCE_AGENT_REL." >&2
-  exit 1
-fi
+# Reutiliza la instalación hecha por setup-opencode.mjs en main.
+# Sin este enlace, el worktree no encuentra node_modules/.bin/opencode.
+ln -s "$MAIN_NODE_MODULES" "$WORKTREE_DIR/node_modules"
 
-if [[ ! -f "$CONFIGURE_SCRIPT_REL" ]]; then
-  echo "No existe $CONFIGURE_SCRIPT_REL." >&2
+if [[ ! -x "$WORKTREE_DIR/node_modules/.bin/opencode" ]]; then
+  echo "El worktree no puede resolver node_modules/.bin/opencode." >&2
   exit 1
 fi
 
@@ -282,11 +381,21 @@ git add -f \
   ".opencode/opencode.json" \
   "opencode.jsonc"
 
-git commit -m "Configure benchmark ${RUN_NAME}"
+if git diff --cached --quiet; then
+  echo "La configuración no produjo cambios; no se crea commit inicial."
+else
+  git commit -m "Configure benchmark ${RUN_NAME}"
+fi
+
+# La preparación terminó. A partir de aquí se conserva el worktree aunque
+# OpenCode o el benchmark fallen, para poder revisar código y logs.
+SETUP_COMPLETE=1
+trap - EXIT
 
 STAMP="$(date '+%Y%m%d-%H%M%S')"
 LOG="opencode-${RUN_NAME}-${STAMP}.log"
 
+echo "Repositorio:   $REPO_ROOT"
 echo "Worktree:      $WORKTREE_DIR"
 echo "Rama:          $BRANCH"
 echo "Agente:        $AGENT_NAME"
@@ -295,6 +404,7 @@ echo "Ollama server: $OLLAMA_SERVER ($OLLAMA_URL)"
 echo "Modelo:        $PROVIDER/$ALIAS"
 echo "Contexto:      $CONTEXT = $CONTEXT_TOKENS tokens"
 echo "Salida:        $OUTPUT = $OUTPUT_TOKENS tokens"
+echo "OpenCode bin:  $WORKTREE_DIR/node_modules/.bin/opencode"
 echo "Log:           $LOG"
 
 npm run opencode -- \

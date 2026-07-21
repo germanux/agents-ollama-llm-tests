@@ -1,9 +1,9 @@
 ---
 description: Complete benchmark with local qwen36-35b-16k
 mode: primary
-model: ollama-pc/qwen36-35b-16k
+model: ollama-pc/qwen36-35b-32k
 steps: 100
-temperature: 0.5
+temperature: 0.1
 
 permission:
   "*": deny

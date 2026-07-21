@@ -113,12 +113,14 @@ RUN_NAME="${MODEL_NAME}-${TEMP_TAG}-${CONTEXT_TAG}-${OUTPUT_TAG}-${HOST_TAG}"
 
 ALIAS="$RUN_NAME"
 BRANCH="benchmark/${RUN_NAME}"
-WORKTREE_DIR="$(dirname "$REPO_ROOT")/${RUN_NAME}"
+WORKTREE_BASE="$REPO_ROOT/agents-harness-benchmark"
+WORKTREE_DIR="$WORKTREE_BASE/${RUN_NAME}"
 AGENT_NAME="$RUN_NAME"
 AGENT_REL=".opencode/agents/${AGENT_NAME}.md"
 MODELFILE_REL=".ollama-modelfiles/Modelfile-${ALIAS}"
 
 cd "$REPO_ROOT"
+mkdir -p "$WORKTREE_BASE"
 
 if [[ -n "$(git status --porcelain)" ]]; then
   echo "La rama main tiene cambios sin confirmar. Déjala limpia antes de ejecutar la prueba." >&2

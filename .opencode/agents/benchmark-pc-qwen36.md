@@ -1,5 +1,5 @@
 ---
-description: Complete benchmark with local qwen36-35b-16k
+description: Complete benchmark with PC remote qwen36-35b-16k
 mode: primary
 model: ollama-pc/qwen36-35b-32k
 steps: 100

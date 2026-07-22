@@ -244,13 +244,13 @@ if [[ ! -x "$WORKTREE_NODE_MODULES/.bin/opencode" ]]; then
 fi
 
 DEFAULT_RESUME_PROMPT=$(cat <<'EOF_PROMPT'
-- Resume the interrupted benchmark from the current working tree in a fresh OpenCode session.
-- Read AGENTS.md and BENCHMARK_TASK.md completely. Inspect the existing worktree yourself using targeted commands and shallow directory listings. Do not assume which phase failed or which phases are complete. Determine the earliest incomplete, failing, or unvalidated phase from the current files, Git history, working-tree changes, and actual validation evidence. Read the BENCHMARK_*.md document required for that phase, and read later phase documents only when they become relevant.
-- Preserve completed, committed, and validated work. Do not redo a completed phase unless a current build or downstream validation proves that a minimal correction is required. Resume from the earliest incomplete or failing phase, validate it, create every required Git checkpoint, and continue through all remaining phases in task order.
-- Do not declare success from file presence alone. Run every validation required by the benchmark. Run notify-success.sh only after all required phases, builds, tests, and Git requirements succeed. Do not recreate the branch, worktree, Ollama model alias, or OpenCode agent configuration.
-- Limit initial reconnaissance to at most five tool calls.
-- Trust checkpoints for implementation progress, but never for current acceptance validation.
-- Run the pending phase validation early.
+Resume the interrupted benchmark from the current working tree in a fresh OpenCode session.
+Read AGENTS.md and BENCHMARK_TASK.md completely. Inspect the existing worktree yourself using targeted commands and shallow directory listings. Do not assume which phase failed or which phases are complete. Determine the earliest incomplete, failing, or unvalidated phase from the current files, Git history, working-tree changes, and actual validation evidence. Read the BENCHMARK_*.md document required for that phase, and read later phase documents only when they become relevant.
+Preserve completed, committed, and validated work. Do not redo a completed phase unless a current build or downstream validation proves that a minimal correction is required. Resume from the earliest incomplete or failing phase, validate it, create every required Git checkpoint, and continue through all remaining phases in task order.
+Do not declare success from file presence alone. Run every validation required by the benchmark. Run notify-success.sh only after all required phases, builds, tests, and Git requirements succeed. Do not recreate the branch, worktree, Ollama model alias, or OpenCode agent configuration.
+Limit initial reconnaissance to at most five tool calls.
+Trust checkpoints for implementation progress, but never for current acceptance validation.
+Run the pending phase validation early.
 EOF_PROMPT
 )
 

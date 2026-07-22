@@ -4,10 +4,23 @@
 
 - Work only inside this repository and only on paths permitted by the active agent configuration.
 - Treat `AGENTS.md` as read-only.
-- Do not use `sudo`, operating-system package managers, browsers, `curl`, `wget`, or external network tools.
-- Do not install runtimes, IDEs, binaries, or system software.
-- Use only the toolchains and dependencies already available in the repository or environment, except dependency resolution explicitly permitted by the active task.
+- Do not use `sudo`, operating-system package managers, browsers, `curl`, `wget`, or arbitrary external network tools.
+- Do not install runtimes, IDEs, global packages, standalone binaries, or system software.
 - Do not push, merge, rebase, reset, switch branches, amend commits, or alter Git history.
+
+## Dependency and tooling policy
+
+- Project-level dependency managers are allowed only when the active task explicitly requires them.
+- Maven may resolve dependencies declared in `pom.xml`.
+- npm may resolve and install project dependencies only inside `frontend/` or while scaffolding `frontend/` from the repository root.
+- Do not install global npm packages and do not use `npm install -g`.
+- Prefer `npm ci` when `frontend/package-lock.json` exists and is consistent with `frontend/package.json`.
+- Use `npm install` only when initially creating the lockfile or intentionally changing declared project dependencies.
+- Use `npm exec` or `npx` only with an explicitly pinned package version. Prefer `npm exec`.
+- Do not run unpinned commands such as `npx @angular/cli@latest`, `npm update`, or `npm audit fix`.
+- Do not change Node, Java, Maven, npm, Angular, or other toolchain versions unless the active task explicitly requires it.
+- Network access is permitted only through Maven or npm dependency resolution explicitly allowed by the active task.
+- Never commit `node_modules`, package-manager caches, Angular caches, or generated temporary build caches.
 
 ## Sources of truth and refresh protocol
 

@@ -16,6 +16,18 @@ The phase specifications are authoritative:
 
 Complete each phase, validate it, and create its milestone commit before starting the next phase. Preserve all previously working behavior and tests.
 
+## Fixed toolchain
+
+Use the toolchain already selected by the launcher or shell:
+
+- Java 21;
+- Maven 3.x running on Java 21;
+- Node.js 20.x, at least 20.9;
+- npm;
+- Angular CLI `17.3.17`, obtained project-locally through the pinned bootstrap command in `BENCHMARK_ANGULAR.md`.
+
+Do not install or change system runtimes during the benchmark. Angular CLI does not need to exist before Phase 3; the phase task explicitly permits downloading the pinned CLI and project dependencies through npm.
+
 ## Mandatory preflight
 
 Before creating or modifying project files, run:
@@ -27,7 +39,6 @@ mvn -version
 node --version
 npm --version
 git status --short
-test -x node_modules/.bin/ng
 ```
 
 Proceed only when all of the following are confirmed:
@@ -35,11 +46,12 @@ Proceed only when all of the following are confirmed:
 - Java 21;
 - `javac` 21;
 - Maven running on Java 21;
-- Node and npm are available;
-- the repository-provisioned Angular CLI exists at `node_modules/.bin/ng`;
+- Node.js 20.x and npm are available;
 - no unrelated working-tree changes would be overwritten.
 
-Do not install or download missing runtimes, binaries, Node packages, or system software. Maven may resolve dependencies declared in `pom.xml`. If a mandatory tool is unavailable, report the exact command and output as an environmental blocker.
+Do not require a preinstalled global or repository-level Angular CLI. Do not treat a missing `node_modules/.bin/ng` as a blocker before the Angular workspace has been created.
+
+Maven and npm may access their normal package registries only for dependency resolution explicitly required by this benchmark. `sudo`, operating-system package managers, global npm installation, `curl`, `wget`, and arbitrary downloads remain prohibited.
 
 ## Execution order
 
@@ -66,6 +78,8 @@ Gate before Phase 3:
 ### Phase 3 — Angular frontend
 
 Re-read `AGENTS.md`, then read and execute `BENCHMARK_ANGULAR.md` completely.
+
+The Angular phase may scaffold `frontend/`, create `package.json` and `package-lock.json`, and download pinned project dependencies through npm as specified by the phase task.
 
 ## Final validation
 

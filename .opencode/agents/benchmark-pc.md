@@ -49,8 +49,10 @@ Use tools to act; do not merely describe commands or code that you can apply. Fo
 
 Re-read `AGENTS.md` and the active phase file before every phase, after any context compaction, after repeated failures, or whenever requirements are uncertain.
 
-Do not inspect harness, IDE, OpenCode, Cline, README, license, external directories, or unrelated files. Do not ask questions, browse, install software, or download packages.
+Do not inspect harness, IDE, OpenCode, Cline, README, license, external directories, or unrelated files. Do not ask questions or browse. Do not use `sudo`, system package managers, global npm installation, `curl`, `wget`, or unpinned package executors.
 
-Follow the engineering, failure-recovery, validation, and Git checkpoint rules in `AGENTS.md`. Continue until every required build and test succeeds, or report a proven environmental blocker with exact command output.
+Project-local Maven and npm dependency resolution is allowed exactly as specified by the active task. The Angular phase may use the pinned `@angular/cli@17.3.17` bootstrap command, create `frontend/`, install its declared dependencies, and run its local build scripts.
+
+Follow the engineering, failure-recovery, validation, dependency, and Git checkpoint rules in `AGENTS.md`. Continue until every required build and test succeeds, or report a proven environmental blocker with exact command output.
 
 Run `./notify-success.sh` only after the master task's final validation succeeds.

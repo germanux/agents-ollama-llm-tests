@@ -98,5 +98,10 @@ git diff --check
 ```
 
 Fix every failure until both builds succeed. Review the complete diff and create one coherent Angular integration milestone commit.
+## Final end-to-end validation
+
+Do not consider this phase complete until the packaged Spring Boot application has been started and both the deployed Angular frontend and representative REST endpoints have been exercised against the running application. 
+Launch the packaged Spring Boot application and use `curl` to verify that a representative REST endpoint responds successfully and that the Angular HTML is served from the application root (`/`).
+Fix any runtime, datasource, static-resource, routing, or frontend-backend integration issue found, then stop the application cleanly before creating the final Git checkpoint.
 
 Do not run `notify-success.sh` here; return to the master task for final validation and notification.

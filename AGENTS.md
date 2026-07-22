@@ -62,6 +62,7 @@
 - Change strategy after every repeated failure; do not remain in a loop.
 - Do not hide command failures with pipelines. When a pipeline is necessary, use `set -o pipefail` and preserve the real exit status.
 - Report a blocker only when command output proves that the environment prevents progress.
+- Treat every temporary server as a managed resource: detect and remove only stale benchmark instances before starting, capture the new process PID, wait for readiness, run all required checks, and terminate that exact process within the same tool call, including on failure.
 
 ## Resume and reconnaissance discipline
 

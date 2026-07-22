@@ -9,8 +9,8 @@
     "ollama-pc"
   ],
 
-  "model": "ollama-pc/qwen3-coder-next-direct",
-  "small_model": "ollama-pc/qwen3-coder-next-direct",
+  "model": "ollama-pc/qwen3-coder-next-80b-t025-168k-8k-pc-pc",
+  "small_model": "ollama-pc/qwen3-coder-next-80b-t025-168k-8k-pc-pc",
   "default_agent": "plan",
   "subagent_depth": 0,
   "lsp": false,

@@ -22,6 +22,15 @@
 - Network access is permitted only through Maven or npm dependency resolution explicitly allowed by the active task.
 - Never commit `node_modules`, package-manager caches, Angular caches, or generated temporary build caches.
 
+## Tool schema and failure recovery
+
+- Tool arguments must match the declared schema exactly.
+- For the `read` tool, `offset` and `limit` must be JSON integers, for example `100` and `40`, never decimal values such as `100.0` or `40.0`.
+- After a tool call fails, treat the returned error message as authoritative and correct the arguments before retrying.
+- Never repeat an identical failed tool call.
+- If the same or an equivalent schema error occurs twice, stop that approach and switch to another valid strategy.
+- Do not continue consuming steps while reproducing the same tool error.
+
 ## Sources of truth and refresh protocol
 
 - Read `AGENTS.md` and the master task completely before acting.
@@ -54,6 +63,21 @@
 - Do not hide command failures with pipelines. When a pipeline is necessary, use `set -o pipefail` and preserve the real exit status.
 - Report a blocker only when command output proves that the environment prevents progress.
 
+## Resume and reconnaissance discipline
+
+When resuming an existing worktree:
+
+- Read `AGENTS.md` and `BENCHMARK_TASK.md`.
+- Use `git status --short` and `git log --oneline -10` to identify completed and pending phases.
+- Treat a phase with its required Git checkpoint as completed unless a current validation command proves otherwise.
+- Do not proactively inspect or reread the implementation of committed phases.
+- Identify the earliest uncommitted or failing phase, then read only its `BENCHMARK_*.md`.
+- Run that phase's canonical validation command before reading many implementation files.
+- Use validation output to choose the specific files that need inspection.
+- Perform no more than five reconnaissance tool calls before either running a validation or making a concrete change.
+- Do not check installed tool versions unless a command actually fails because of the environment.
+- Preserve context for implementation, testing and recovery rather than broad repository exploration.
+- 
 ## Git checkpoints
 
 - Before each milestone commit, run `git status --short`, review `git diff`, and run the milestone validation.

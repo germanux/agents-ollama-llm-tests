@@ -62,13 +62,22 @@ test -f AGENTS.md
 
 **EN summary:** Always run the bootstrap from the repository root to keep the environment [hermetic].
 
-### 1.2. Seleccionar Node 22 con NVM
+### 1.2. Preparar Node con NVM
 
-El bootstrap exige Node.js 22.x.
+La instalación de OpenCode usa Node.js `22.23.1`. La fase Angular 17 usa Node `20.x`.
+
+Si NVM todavía no está instalado, hacerlo manualmente antes de lanzar el agente:
 
 ```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 source "$NVM_DIR/nvm.sh"
+```
+
+Instalar y seleccionar Node para OpenCode:
+
+```bash
+nvm install 22.23.1
 nvm use 22.23.1
 ```
 
@@ -85,6 +94,15 @@ Resultado esperado para Node:
 v22.23.1
 ```
 
+Para crear o compilar el frontend Angular 17, cambiar previamente a Node 20:
+
+```bash
+nvm install 20
+nvm use 20
+node --version
+npm --version
+```
+
 Comprobación compacta:
 
 ```bash
@@ -92,7 +110,34 @@ node -p "process.version"
 node -p "process.platform + ' ' + process.arch"
 ```
 
-**EN summary:** Pinning Node reduces version [drift] between machines.
+> `sudo`, gestores de paquetes del sistema y descargas arbitrarias siguen prohibidos al agente. Estos comandos pertenecen a la preparación manual del equipo.
+
+**EN summary:** Use Node 22 for the OpenCode bootstrap and Node 20 for the Angular 17 toolchain.
+
+### 1.2.1. Instalar Java 21 y Maven
+
+En Ubuntu/Zorin, preparar el equipo una sola vez:
+
+```bash
+sudo apt update
+sudo apt install -y openjdk-21-jdk maven
+```
+
+Seleccionar Java 21 en la shell que lanzará el benchmark:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+export PATH="$JAVA_HOME/bin:$PATH"
+hash -r
+
+java -version
+javac -version
+mvn -version
+```
+
+Los tres comandos deben mostrar Java 21. Para conservarlo entre terminales, añadir `JAVA_HOME` y el `PATH` anterior a `~/.bashrc` o al perfil de shell utilizado.
+
+**EN summary:** Install the toolchain manually and verify that both Maven and the compiler actually run on Java 21.
 
 ### 1.3. Primera instalación de OpenCode
 
@@ -453,7 +498,7 @@ Contiene:
 
 - alcance y seguridad;
 - prohibición de tocar fuera del repositorio;
-- prohibición de instalar software;
+- prohibición de instalaciones globales o del sistema; las dependencias Maven/npm del proyecto solo se permiten cuando la tarea activa las autoriza;
 - método de reparación;
 - validación con Maven;
 - política de Git.
@@ -491,10 +536,39 @@ sed -n '1,320p' BENCHMARK_TASK.md
 java -version
 javac -version
 mvn -version
+node --version
+npm --version
 git status --short
 ```
 
-Debe confirmarse Java 21 en los tres primeros comandos.
+Debe confirmarse Java 21 en los tres primeros comandos. Para el bootstrap de OpenCode se usa Node 22; para Angular 17 se cambia a Node 20 antes de ejecutar sus comandos.
+
+### Crear el frontend Angular 17
+
+Cuando `frontend/package.json` todavía no exista, el benchmark puede generar el scaffold con una versión fijada del CLI:
+
+```bash
+nvm use 20
+npm exec --yes --package=@angular/cli@17.3.17 -- \
+  ng new frontend \
+  --directory frontend \
+  --standalone \
+  --routing=false \
+  --style=css \
+  --skip-git \
+  --skip-tests \
+  --package-manager=npm \
+  --strict \
+  --defaults
+```
+
+Después:
+
+```bash
+npm --prefix frontend run build
+```
+
+Si ya existe un `package-lock.json` válido, usar `npm --prefix frontend ci` en lugar de regenerar dependencias.
 
 ### Ejecutar tests manualmente
 
@@ -578,10 +652,11 @@ Permisos mínimos previstos:
 
 - leer el repositorio;
 - editar únicamente dentro del repositorio;
-- ejecutar preflight de Java/Maven;
-- ejecutar `mvn test`;
+- ejecutar preflight de Java/Maven/Node;
+- ejecutar `mvn test` y los scripts npm del frontend;
+- permitir `npm install`, `npm ci` y `npm exec` únicamente dentro de `frontend/` y con versiones fijadas cuando corresponda;
 - consultar `git status` y `git diff`;
-- prohibir `sudo`, `apt`, `curl`, `wget`, navegadores y rutas externas;
+- prohibir `sudo`, gestores de paquetes del sistema, instalaciones npm globales, `curl`, `wget`, navegadores y rutas externas;
 - prohibir subagentes al principio.
 
 Comandos que el agente necesitará:
@@ -590,7 +665,10 @@ Comandos que el agente necesitará:
 java -version
 javac -version
 mvn -version
+node --version
+npm --version
 mvn test
+npm --prefix frontend run build
 git status --short
 git diff --stat
 git diff
@@ -604,6 +682,9 @@ apt
 apt-get
 snap
 flatpak
+npm install -g
+npm update
+npx sin versión fijada
 curl
 wget
 rm sobre rutas externas

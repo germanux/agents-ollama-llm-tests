@@ -1,5 +1,6 @@
 package com.example.benchmark.backend.service;
 
+import com.example.benchmark.backend.exception.ResourceNotFoundException;
 import com.example.benchmark.backend.model.Author;
 import com.example.benchmark.backend.model.Book;
 import com.example.benchmark.backend.repository.AuthorRepository;
@@ -33,7 +34,7 @@ public class LibraryService {
         List<Author> authors = authorRepository.findAllById(authorIds);
 
         if (authors.size() != authorIds.size()) {
-            throw new IllegalArgumentException("One or more author IDs not found");
+            throw new ResourceNotFoundException("Author", authorIds.stream().filter(id -> !authors.stream().map(Author::getId).toList().contains(id)).findFirst().orElse(0L));
         }
 
         Book book = new Book(title, description);
@@ -46,5 +47,13 @@ public class LibraryService {
 
     public List<String> getBookTitlesByAuthorId(Long authorId) {
         return authorRepository.findBookTitlesByAuthorId(authorId);
+    }
+
+    public List<Author> findAllAuthors() {
+        return authorRepository.findAll();
+    }
+
+    public List<Book> findAllBooks() {
+        return bookRepository.findAll();
     }
 }

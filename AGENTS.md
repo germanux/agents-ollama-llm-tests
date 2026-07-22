@@ -90,4 +90,6 @@ When resuming an existing worktree:
 - The active task defines the authoritative success commands and completion criteria.
 - Do not claim success while any required compile, test, lint, or build is failing.
 - Re-run the complete required validation after the final correction.
+- When resuming a worktree that appears complete, read the phase document associated with the latest implementation checkpoint and re-run all current acceptance criteria defined there. 
+- A clean working tree or a commit message claiming validation is not evidence that the latest benchmark requirements have been executed.
 - Run `./notify-success.sh` only when the master task explicitly permits it and every required phase has succeeded.

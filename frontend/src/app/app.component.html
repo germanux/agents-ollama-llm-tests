@@ -84,10 +84,8 @@
               }
               <div class="authors">
                 Authors: 
-                @for (authorId of book.authorIds; track authorId) {
-                  @if (authors.find(a => a.id === authorId)) {
-                    <span>{{ authors.find(a => a.id === authorId)!.firstName }} {{ authors.find(a => a.id === authorId)!.lastName }}</span>
-                  }
+                @for (author of getBookAuthors(book.authorIds); track author.id) {
+                  <span>{{ author.firstName }} {{ author.lastName }}</span>
                 }
               </div>
             </li>
@@ -106,12 +104,11 @@
         @if (selectedAuthorIds.includes(author.id)) {
           <div class="author-books">
             <h3>{{ author.firstName }} {{ author.lastName }}</h3>
-            @let titles = getBookTitlesForAuthor(author);
-            @if (titles.length === 0) {
+            @if (getBookTitlesForAuthor(author).length === 0) {
               <p>No books yet.</p>
             } @else {
               <ul>
-                @for (title of titles; track title) {
+                @for (title of getBookTitlesForAuthor(author); track title) {
                   <li>{{ title }}</li>
                 }
               </ul>

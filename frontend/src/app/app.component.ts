@@ -123,4 +123,14 @@ export class AppComponent {
       .map(book => book.title);
     return bookIds;
   }
+
+  findAuthorById(id: number): Author | undefined {
+    return this.authors.find(a => a.id === id);
+  }
+
+  getBookAuthors(authorIds: number[]): Author[] {
+    return authorIds
+      .map(id => this.findAuthorById(id))
+      .filter((a): a is Author => !!a);
+  }
 }

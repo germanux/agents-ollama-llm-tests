@@ -3,7 +3,7 @@ set -euo pipefail
 #Vamos a hacer algo más interesante. Mientras termina estas pruebas, a intentar ya directamente crear los agentes para desarrollo un poco más largo, pero más contenido, que no se líe con comandos como ese Glob que debe ser como un cat o algo así, ¿o un ls? Evitando finds locos y demás. Me da que la mejor temperatura es 0.2 para el equilibrio agentico y calidad y que no se quede pillado. Quiero probar a apurar 128K en el PC para ver si mejoramos la calidad final. QUiero mejorar los MD, agent, generarl y benchmark, pero sin volvernos locos que usaré los mismos para el portatil.
 
 MODEL="qwen3-coder-next:latest"
-CONTEXT="64K"
+CONTEXT="128K"
 OUTPUT="6K"
 TEMPERATURE=0.25
 OLLAMA_SERVER="PC"

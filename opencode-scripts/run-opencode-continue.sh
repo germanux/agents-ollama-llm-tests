@@ -1,48 +1,64 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Continúa una ejecución existente en una sesión nueva de OpenCode.
-# Reutiliza MODEL, CONTEXT, OUTPUT, TEMPERATURE y OLLAMA_SERVER del
-# script principal, pero NO crea ni modifica la rama, el worktree,
-# el alias Ollama ni el agente.
+# Reanuda un benchmark dentro de su worktree existente, pero con una sesión
+# nueva de OpenCode. No crea rama, worktree, alias ni agente nuevos.
 #
 # Uso:
-#   ./run-opencode-continue.sh
-#   ./run-opencode-continue.sh ./run-opencode-benchmark-worktree.sh
+#   ./opencode-scripts/run-opencode-recover-existing-worktree.sh
+#   ./opencode-scripts/run-opencode-recover-existing-worktree.sh ./run-opencode-benchmark-worktree.sh
+#
+# Opcional:
+#   RESUME_PROMPT='Prompt alternativo...' ./opencode-scripts/run-opencode-recover-existing-worktree.sh ...
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 MAIN_SCRIPT="${1:-}"
 
 find_main_script() {
-  local conventional="$SCRIPT_DIR/run-opencode-benchmark-worktree.sh"
   local candidates=()
+  local candidate
 
-  if [[ -f "$conventional" ]]; then
-    printf '%s' "$conventional"
-    return
-  fi
+  for candidate in \
+    "$REPO_ROOT/run-opencode-benchmark-worktree.sh" \
+    "$SCRIPT_DIR/run-opencode-benchmark-worktree.sh"
+  do
+    if [[ -f "$candidate" ]]; then
+      printf '%s' "$candidate"
+      return
+    fi
+  done
 
-  while IFS= read -r -d '' candidate; do
-    candidates+=("$candidate")
-  done < <(
-    find "$SCRIPT_DIR" -maxdepth 1 -type f \
-      -name 'run-opencode-benchmark-worktree*.sh' \
-      -print0
+  shopt -s nullglob
+  candidates=(
+    "$REPO_ROOT"/run-opencode-benchmark-worktree*.sh
+    "$SCRIPT_DIR"/run-opencode-benchmark-worktree*.sh
   )
+  shopt -u nullglob
 
-  if [[ "${#candidates[@]}" -eq 1 ]]; then
-    printf '%s' "${candidates[0]}"
+  # Elimina posibles duplicados manteniendo el orden.
+  local unique=()
+  local seen='|'
+  for candidate in "${candidates[@]}"; do
+    if [[ "$seen" != *"|$candidate|"* ]]; then
+      unique+=("$candidate")
+      seen+="$candidate|"
+    fi
+  done
+
+  if [[ "${#unique[@]}" -eq 1 ]]; then
+    printf '%s' "${unique[0]}"
     return
   fi
 
-  if [[ "${#candidates[@]}" -eq 0 ]]; then
-    echo "No se encontró el script principal." >&2
+  if [[ "${#unique[@]}" -eq 0 ]]; then
+    echo "No se encontró el script principal run-opencode-benchmark-worktree*.sh." >&2
   else
     echo "Hay varios scripts principales candidatos:" >&2
-    printf '  %s\n' "${candidates[@]}" >&2
+    printf '  %s\n' "${unique[@]}" >&2
   fi
 
-  echo "Indícalo como primer argumento:" >&2
+  echo "Indica el script principal como primer argumento:" >&2
   echo "  $0 ./run-opencode-benchmark-worktree.sh" >&2
   exit 1
 }
@@ -57,39 +73,41 @@ if [[ ! -f "$MAIN_SCRIPT" ]]; then
 fi
 
 MAIN_SCRIPT="$(cd "$(dirname "$MAIN_SCRIPT")" && pwd)/$(basename "$MAIN_SCRIPT")"
-MAIN_SCRIPT_DIR="$(dirname "$MAIN_SCRIPT")"
-REPO_ROOT="$(git -C "$MAIN_SCRIPT_DIR" rev-parse --show-toplevel)"
 
-# Carga únicamente las cinco asignaciones de configuración. No ejecuta el
-# script principal ni ninguna de sus acciones de creación/configuración.
-CONFIG_LINES="$(
-  grep -m 5 -E '^(MODEL|CONTEXT|OUTPUT|TEMPERATURE|OLLAMA_SERVER)=' "$MAIN_SCRIPT" || true
-)"
+# Extrae únicamente la PRIMERA asignación literal de cada parámetro.
+# No hace source del script principal y, por tanto, no ejecuta sus funciones,
+# sustituciones de comandos ni lógica de creación del worktree.
+extract_literal_assignment() {
+  local name="$1"
+  local line rhs value
 
-for required_var in MODEL CONTEXT OUTPUT TEMPERATURE OLLAMA_SERVER; do
-  if ! grep -qE "^${required_var}=" <<<"$CONFIG_LINES"; then
-    echo "No se encontró ${required_var}=... en $MAIN_SCRIPT" >&2
+  line="$(awk -v key="$name" 'index($0, key "=") == 1 { print; exit }' "$MAIN_SCRIPT")"
+
+  if [[ -z "$line" ]]; then
+    echo "No se encontró ${name}=... en $MAIN_SCRIPT" >&2
     exit 1
   fi
-done
 
-# shellcheck disable=SC1090
-source /dev/stdin <<<"$CONFIG_LINES"
+  rhs="${line#*=}"
 
-HOSTNAME_SHORT="$(hostname -s)"
-
-case "$HOSTNAME_SHORT" in
-  PC-GIGA-ZORUX)
-    OPENCODE_HOST="PC"
-    ;;
-  PC-ASUS-ZORIN)
-    OPENCODE_HOST="LP"
-    ;;
-  *)
-    echo "Host no reconocido: $HOSTNAME_SHORT" >&2
+  if [[ "$rhs" =~ ^\"([^\"]*)\"[[:space:]]*(#.*)?$ ]]; then
+    value="${BASH_REMATCH[1]}"
+  elif [[ "$rhs" =~ ^([^[:space:]#]+)[[:space:]]*(#.*)?$ ]]; then
+    value="${BASH_REMATCH[1]}"
+  else
+    echo "${name} debe tener una asignación literal simple en $MAIN_SCRIPT:" >&2
+    echo "  ${name}=\"valor\"" >&2
+    echo "  ${name}=valor" >&2
+    echo "Línea encontrada: $line" >&2
     exit 1
-    ;;
-esac
+  fi
+
+  printf -v "$name" '%s' "$value"
+}
+
+for required_var in MODEL CONTEXT OUTPUT TEMPERATURE OLLAMA_SERVER; do
+  extract_literal_assignment "$required_var"
+done
 
 normalize_machine() {
   case "${1^^}" in
@@ -100,7 +118,7 @@ normalize_machine() {
       printf 'LP'
       ;;
     *)
-      echo "OLLAMA_SERVER debe ser PC o LP." >&2
+      echo "La máquina debe ser PC o LP; valor recibido: $1" >&2
       exit 1
       ;;
   esac
@@ -133,6 +151,19 @@ normalize_model_name() {
   esac
 }
 
+case "$(hostname -s)" in
+  PC-GIGA-ZORUX)
+    OPENCODE_HOST="PC"
+    ;;
+  PC-ASUS-ZORIN)
+    OPENCODE_HOST="LP"
+    ;;
+  *)
+    echo "Host no reconocido: $(hostname -s)" >&2
+    exit 1
+    ;;
+esac
+
 OPENCODE_HOST="$(normalize_machine "$OPENCODE_HOST")"
 OLLAMA_SERVER="$(normalize_machine "$OLLAMA_SERVER")"
 
@@ -141,6 +172,12 @@ OUTPUT_TOKENS="$(k_to_tokens "$OUTPUT")"
 CONTEXT_TAG="$(printf '%s' "$CONTEXT" | tr '[:upper:]' '[:lower:]')"
 OUTPUT_TAG="$(printf '%s' "$OUTPUT" | tr '[:upper:]' '[:lower:]')"
 MODEL_NAME="$(normalize_model_name)"
+
+if [[ -z "$MODEL_NAME" ]]; then
+  echo "No se pudo construir un nombre válido a partir de MODEL=$MODEL." >&2
+  exit 1
+fi
+
 TEMP_TAG="t$(printf '%s' "$TEMPERATURE" | tr -d '.')"
 HOST_TAG="$(printf '%s-%s' "$OPENCODE_HOST" "$OLLAMA_SERVER" | tr '[:upper:]' '[:lower:]')"
 RUN_NAME="${MODEL_NAME}-${TEMP_TAG}-${CONTEXT_TAG}-${OUTPUT_TAG}-${HOST_TAG}"
@@ -151,9 +188,8 @@ AGENT_NAME="$RUN_NAME"
 AGENT_REL=".opencode/agents/${AGENT_NAME}.md"
 
 if [[ ! -d "$WORKTREE_DIR" ]]; then
-  echo "No existe el worktree que corresponde a esos parámetros:" >&2
+  echo "No existe el worktree correspondiente a los parámetros del script principal:" >&2
   echo "  $WORKTREE_DIR" >&2
-  echo "No se ha creado nada. Revisa los parámetros del script principal." >&2
   exit 1
 fi
 
@@ -175,7 +211,6 @@ for required_file in \
   "$AGENT_REL" \
   "AGENTS.md" \
   "BENCHMARK_TASK.md" \
-  "BENCHMARK_ANGULAR.md" \
   "package.json"
 do
   if [[ ! -f "$WORKTREE_DIR/$required_file" ]]; then
@@ -194,7 +229,8 @@ WORKTREE_NODE_MODULES="$WORKTREE_DIR/node_modules"
 
 if [[ ! -e "$WORKTREE_NODE_MODULES" ]]; then
   if [[ ! -d "$MAIN_NODE_MODULES" ]]; then
-    echo "No existe $MAIN_NODE_MODULES; ejecuta primero setup-opencode.mjs." >&2
+    echo "No existe $MAIN_NODE_MODULES; ejecuta primero:" >&2
+    echo "  node opencode-scripts/setup-opencode.mjs" >&2
     exit 1
   fi
 
@@ -207,36 +243,54 @@ if [[ ! -x "$WORKTREE_NODE_MODULES/.bin/opencode" ]]; then
   exit 1
 fi
 
-CONTINUE_PROMPT="${CONTINUE_PROMPT:-Continue from the current working tree in a fresh session. Do not recreate the branch or worktree, and do not redo completed persistence or REST phases. Read AGENTS.md, BENCHMARK_TASK.md and BENCHMARK_ANGULAR.md completely. Inspect git status, the existing Angular implementation and the latest build failure. Fix the current Angular build error, beginning with frontend/src/app/app.component.html. When using the read tool, offset and limit must be integer JSON numbers, never decimal values. Then complete Angular, frontend-backend integration, final validation and the required Git checkpoint. Run notify-success.sh only after every required build and test succeeds.}"
+DEFAULT_RESUME_PROMPT=$(cat <<'EOF_PROMPT'
+Resume the interrupted benchmark from the current working tree in a fresh OpenCode session.
 
+Read AGENTS.md and BENCHMARK_TASK.md completely. Inspect the existing worktree yourself using targeted commands and shallow directory listings. Do not assume which phase failed or which phases are complete. Determine the earliest incomplete, failing, or unvalidated phase from the current files, Git history, working-tree changes, and actual validation evidence. Read the BENCHMARK_*.md document required for that phase, and read later phase documents only when they become relevant.
+
+Preserve completed, committed, and validated work. Do not redo a completed phase unless a current build or downstream validation proves that a minimal correction is required. Resume from the earliest incomplete or failing phase, validate it, create every required Git checkpoint, and continue through all remaining phases in task order.
+
+Do not declare success from file presence alone. Run every validation required by the benchmark. Run notify-success.sh only after all required phases, builds, tests, and Git requirements succeed. Do not recreate the branch, worktree, Ollama model alias, or OpenCode agent configuration.
+EOF_PROMPT
+)
+
+RESUME_PROMPT="${RESUME_PROMPT:-$DEFAULT_RESUME_PROMPT}"
 STAMP="$(date '+%Y%m%d-%H%M%S')"
-LOG="opencode-${RUN_NAME}-continue-${STAMP}.log"
+LOG="opencode-${RUN_NAME}-resume-${STAMP}.log"
+RUNTIME_DIR="$WORKTREE_DIR/.opencode-runtime"
+RUNTIME_REMOVED="no"
+
+# Elimina solo el estado mutable de la sesión anterior. No toca código, commits,
+# cambios sin confirmar, configuración del agente ni logs externos del worktree.
+if [[ -e "$RUNTIME_DIR" ]]; then
+  rm -rf -- "$RUNTIME_DIR"
+  RUNTIME_REMOVED="sí"
+fi
 
 cd "$WORKTREE_DIR"
 
 printf '%s\n' \
-  "Script base:   $MAIN_SCRIPT" \
-  "Repositorio:   $REPO_ROOT" \
-  "Worktree:      $WORKTREE_DIR" \
-  "Rama:          $BRANCH" \
-  "Agente:        $AGENT_NAME" \
-  "Modelo base:   $MODEL" \
-  "Contexto:      $CONTEXT = $CONTEXT_TOKENS tokens" \
-  "Salida:        $OUTPUT = $OUTPUT_TOKENS tokens" \
-  "Temperatura:   $TEMPERATURE" \
-  "OpenCode host: $OPENCODE_HOST" \
-  "Ollama server: $OLLAMA_SERVER" \
-  "Log:           $LOG" \
+  "Script base:     $MAIN_SCRIPT" \
+  "Repositorio:     $REPO_ROOT" \
+  "Worktree:        $WORKTREE_DIR" \
+  "Rama:            $BRANCH" \
+  "Agente:          $AGENT_NAME" \
+  "Modelo base:     $MODEL" \
+  "Contexto:        $CONTEXT = $CONTEXT_TOKENS tokens" \
+  "Salida:          $OUTPUT = $OUTPUT_TOKENS tokens" \
+  "Temperatura:     $TEMPERATURE" \
+  "OpenCode host:   $OPENCODE_HOST" \
+  "Ollama server:   $OLLAMA_SERVER" \
+  "Runtime borrado: $RUNTIME_REMOVED" \
+  "Log:             $LOG" \
   "" \
-  "Estado actual del worktree:"
-
-git status --short
-printf '\nIniciando una sesión nueva de OpenCode sobre el worktree existente...\n\n'
+  "Iniciando una sesión nueva sobre el worktree existente..." \
+  ""
 
 npm run opencode -- \
   --print-logs \
   --log-level INFO \
   run \
   --agent "$AGENT_NAME" \
-  "$CONTINUE_PROMPT" \
+  "$RESUME_PROMPT" \
   2>&1 | tee "$LOG"

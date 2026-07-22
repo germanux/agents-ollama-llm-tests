@@ -22,6 +22,15 @@
 - Network access is permitted only through Maven or npm dependency resolution explicitly allowed by the active task.
 - Never commit `node_modules`, package-manager caches, Angular caches, or generated temporary build caches.
 
+## Tool schema and failure recovery
+
+- Tool arguments must match the declared schema exactly.
+- For the `read` tool, `offset` and `limit` must be JSON integers, for example `100` and `40`, never decimal values such as `100.0` or `40.0`.
+- After a tool call fails, treat the returned error message as authoritative and correct the arguments before retrying.
+- Never repeat an identical failed tool call.
+- If the same or an equivalent schema error occurs twice, stop that approach and switch to another valid strategy.
+- Do not continue consuming steps while reproducing the same tool error.
+
 ## Sources of truth and refresh protocol
 
 - Read `AGENTS.md` and the master task completely before acting.

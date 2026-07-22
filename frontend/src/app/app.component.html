@@ -1,0 +1,207 @@
+<div class="container">
+  <h1>Library Management</h1>
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  <!-- Author Section -->
+  <section class="author-section">
+    <h2>Authors</h2>
+    
+    @if (loadingAuthors) {
+      <p>Loading authors...</p>
+    } @else {
+      <form (ngSubmit)="createAuthor()" #authorForm="ngForm" class="author-form">
+        <input type="text" name="firstName" [(ngModel)]="firstName" placeholder="First Name" required />
+        <input type="text" name="lastName" [(ngModel)]="lastName" placeholder="Last Name" required />
+        <input type="number" name="age" [(ngModel)]="age" placeholder="Age (optional)" />
+        <button type="submit" [disabled]="isCreatingAuthor">Create Author</button>
+      </form>
+
+      @if (authors.length === 0) {
+        <p>No authors yet.</p>
+      } @else {
+        <ul class="author-list">
+          @for (author of authors; track author.id) {
+            <li class="author-item">
+              <span>{{ author.firstName }} {{ author.lastName }}</span>
+              @if (author.age) {
+                <span>(Age: {{ author.age }})</span>
+              }
+              <button (click)="selectedAuthorIds = [author.id]; getBookTitlesForAuthor(author)">
+                View Books
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <!-- Book Section -->
+  <section class="book-section">
+    <h2>Books</h2>
+    
+    @if (loadingBooks) {
+      <p>Loading books...</p>
+    } @else {
+      <form (ngSubmit)="createBook()" #bookForm="ngForm" class="book-form">
+        <input type="text" name="title" [(ngModel)]="bookTitle" placeholder="Book Title" required />
+        <textarea name="description" [(ngModel)]="bookDescription" placeholder="Description"></textarea>
+        
+        @if (authors.length > 0) {
+          <div class="author-selection">
+            <h4>Select Authors:</h4>
+            @for (author of authors; track author.id) {
+              <label>
+                <input type="checkbox" 
+                       [value]="author.id"
+                       [checked]="selectedAuthorIds.includes(author.id)"
+                       (change)="toggleAuthorSelection(author.id, $event)" />
+                {{ author.firstName }} {{ author.lastName }}
+              </label>
+            }
+          </div>
+        } @else {
+          <p class="warning">Please create authors first.</p>
+        }
+        
+        <button type="submit" [disabled]="isCreatingBook || selectedAuthorIds.length === 0">
+          Create Book
+        </button>
+      </form>
+
+      @if (books.length === 0) {
+        <p>No books yet.</p>
+      } @else {
+        <ul class="book-list">
+          @for (book of books; track book.id) {
+            <li class="book-item">
+              <h3>{{ book.title }}</h3>
+              @if (book.description) {
+                <p>{{ book.description }}</p>
+              }
+              <div class="authors">
+                Authors: 
+                @for (authorId of book.authorIds; track authorId) {
+                  @if (authors.find(a => a.id === authorId)) {
+                    <span>{{ authors.find(a => a.id === authorId)!.firstName }} {{ authors.find(a => a.id === authorId)!.lastName }}</span>
+                  }
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <!-- Selected Author Books -->
+  @if (selectedAuthorIds.length > 0 && authors.length > 0) {
+    <section class="author-books-section">
+      <h2>Books by Selected Author</h2>
+      
+      @for (author of authors; track author.id) {
+        @if (selectedAuthorIds.includes(author.id)) {
+          <div class="author-books">
+            <h3>{{ author.firstName }} {{ author.lastName }}</h3>
+            @let titles = getBookTitlesForAuthor(author);
+            @if (titles.length === 0) {
+              <p>No books yet.</p>
+            } @else {
+              <ul>
+                @for (title of titles; track title) {
+                  <li>{{ title }}</li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      }
+    </section>
+  }
+</div>
+
+<style>
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  h1, h2, h3 {
+    color: #333;
+  }
+
+  .error {
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    color: #c62828;
+  }
+
+  section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+  }
+
+  .author-form, .book-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  input, textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  button {
+    padding: 10px 20px;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .author-list, .book-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .author-item, .book-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .author-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 10px 0;
+  }
+
+  .warning {
+    color: #f57c00;
+    font-style: italic;
+  }
+</style>

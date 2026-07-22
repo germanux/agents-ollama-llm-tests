@@ -63,6 +63,21 @@
 - Do not hide command failures with pipelines. When a pipeline is necessary, use `set -o pipefail` and preserve the real exit status.
 - Report a blocker only when command output proves that the environment prevents progress.
 
+## Resume and reconnaissance discipline
+
+When resuming an existing worktree:
+
+- Read `AGENTS.md` and `BENCHMARK_TASK.md`.
+- Use `git status --short` and `git log --oneline -10` to identify completed and pending phases.
+- Treat a phase with its required Git checkpoint as completed unless a current validation command proves otherwise.
+- Do not proactively inspect or reread the implementation of committed phases.
+- Identify the earliest uncommitted or failing phase, then read only its `BENCHMARK_*.md`.
+- Run that phase's canonical validation command before reading many implementation files.
+- Use validation output to choose the specific files that need inspection.
+- Perform no more than five reconnaissance tool calls before either running a validation or making a concrete change.
+- Do not check installed tool versions unless a command actually fails because of the environment.
+- Preserve context for implementation, testing and recovery rather than broad repository exploration.
+- 
 ## Git checkpoints
 
 - Before each milestone commit, run `git status --short`, review `git diff`, and run the milestone validation.

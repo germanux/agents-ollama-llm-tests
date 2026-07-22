@@ -2,61 +2,55 @@
 
 ## Scope and safety
 
-- Work only inside this repository.
-- Do not modify `AGENTS.md` or `BENCHMARK_TASK.md`.
-- Do not access or change files outside the permitted benchmark paths.
-- Do not use `sudo`, package managers, browsers, `curl`, or `wget`.
-- Do not install or download Java, Maven, runtimes, IDEs, or binaries.
-- Java 21, `javac`, and Maven are already installed.
-- Maven may download dependencies declared in `pom.xml`.
-- Do not push, merge, rebase, reset, switch branches, or amend commits.
+- Work only inside this repository and only on paths permitted by the active agent configuration.
+- Treat `AGENTS.md` as read-only.
+- Do not use `sudo`, operating-system package managers, browsers, `curl`, `wget`, or external network tools.
+- Do not install runtimes, IDEs, binaries, or system software.
+- Use only the toolchains and dependencies already available in the repository or environment, except dependency resolution explicitly permitted by the active task.
+- Do not push, merge, rebase, reset, switch branches, amend commits, or alter Git history.
+
+## Sources of truth and refresh protocol
+
+- Read `AGENTS.md` and the master task completely before acting.
+- Read the active phase task completely before starting that phase.
+- Re-read `AGENTS.md` and the active phase task:
+  - before each major phase or milestone;
+  - after any context compaction or context shift;
+  - after repeated failures;
+  - whenever a requirement is uncertain.
+- Do not rely on memory when the instruction files can be read again.
+- Resolve ambiguity with the simplest interpretation consistent with the active task. Do not invent requirements.
 
 ## Engineering method
 
-- Think before editing. Identify the current objective and the evidence available.
-- Do not hide uncertainty. When ambiguity remains, choose the simplest interpretation consistent with `BENCHMARK_TASK.md`; do not invent requirements.
-- Implement the minimum code needed. Avoid speculative abstractions, extra layers, and unrelated cleanup.
-- Make surgical changes. Every changed line must support the benchmark objective.
+- Inspect the current repository state before editing.
+- Plan briefly, then use tools to act. Keep reasoning concise.
+- Implement the minimum complete solution. Avoid speculative abstractions and unrelated cleanup.
 - Preserve working code and change one cause at a time.
-- Never weaken tests or requirements merely to obtain a green build.
+- Work in small, coherent batches, normally one to four tightly related files.
+- After each batch, run the narrowest meaningful compile, lint, test, or build command defined by the active task.
+- Never weaken requirements or tests merely to obtain a green build.
 
-## Small-batch execution
+## Tool and failure discipline
 
-Work in coherent batches of no more than two new or materially changed project files.
-
-After each batch:
-
-1. Run the narrowest meaningful verification:
-   - `mvn -q -DskipTests compile` for production-code batches.
-   - `mvn -q test` for test-related batches or final validation.
-2. If it fails, use the exact output to diagnose and fix the cause before committing.
-3. Run `git status --short` and `git diff`.
-4. Stage only the files from that batch and create one coherent commit.
-
-If a batch is temporarily uncompilable because two tightly coupled files are required, finish that pair before verification. Do not accumulate a larger batch.
-
-Recommended milestones:
-
-1. `pom.xml` and application class.
-2. `Author` and `Book` entities.
-3. Two repositories.
-4. Service and test configuration.
-5. Integration tests and final fixes.
-
-## Failure recovery
-
+- Use the exact tool schema. After one rejected tool call, correct the arguments before retrying.
 - Never repeat an unchanged failed tool call.
-- After a failed edit, read the current file before retrying.
-- After two failed edits on the same file, rewrite that file completely.
+- After two failed edits on the same file, read the current file and rewrite it completely or use another permitted editing method.
 - After a failed command, use its actual output as the next diagnostic input.
-- Change strategy after every repeated failure.
-- Do not stop because the task is difficult or the model is local.
+- Change strategy after every repeated failure; do not remain in a loop.
+- Do not hide command failures with pipelines. When a pipeline is necessary, use `set -o pipefail` and preserve the real exit status.
 - Report a blocker only when command output proves that the environment prevents progress.
+
+## Git checkpoints
+
+- Before each milestone commit, run `git status --short`, review `git diff`, and run the milestone validation.
+- Commit only coherent, verified work. Never commit a knowingly failing state.
+- Stage only files belonging to the completed milestone.
+- Use concise commit messages describing the implemented capability.
 
 ## Validation and completion
 
-- Define success as all requirements implemented and `mvn test` reporting `BUILD SUCCESS`.
-- Tests must verify database persistence after `flush()` and `clear()`; cached in-memory state is insufficient.
-- Do not claim success while compilation or any test is failing.
-- Keep reasoning concise and issue the next tool call as soon as the action is clear.
-- Run `./notify-success.sh` only after verified `BUILD SUCCESS`.
+- The active task defines the authoritative success commands and completion criteria.
+- Do not claim success while any required compile, test, lint, or build is failing.
+- Re-run the complete required validation after the final correction.
+- Run `./notify-success.sh` only when the master task explicitly permits it and every required phase has succeeded.

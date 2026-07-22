@@ -1,4 +1,20 @@
-# AGENTIC CODING BENCHMARK
+# FULL-STACK AGENTIC CODING BENCHMARK
+
+## Objective
+
+Build and validate a complete Spring Boot and Angular application in three ordered phases:
+
+1. persistence and service layer;
+2. REST backend;
+3. Angular frontend and Spring Boot integration.
+
+The phase specifications are authoritative:
+
+- `BENCHMARK_BACKEND_DB.md`
+- `BENCHMARK_BACKEND_REST.md`
+- `BENCHMARK_ANGULAR.md`
+
+Complete each phase, validate it, and create its milestone commit before starting the next phase. Preserve all previously working behavior and tests.
 
 ## Mandatory preflight
 
@@ -8,86 +24,73 @@ Before creating or modifying project files, run:
 java -version
 javac -version
 mvn -version
+node --version
+npm --version
+git status --short
+test -x node_modules/.bin/ng
 ```
 
-Proceed only when Java 21, `javac` 21, and Maven running on Java 21 are confirmed. Otherwise report the exact blocker.
+Proceed only when all of the following are confirmed:
 
-## Objective
+- Java 21;
+- `javac` 21;
+- Maven running on Java 21;
+- Node and npm are available;
+- the repository-provisioned Angular CLI exists at `node_modules/.bin/ng`;
+- no unrelated working-tree changes would be overwritten.
 
-Create from scratch a Java 21 Maven project using Spring Boot 3, Spring Data JPA, and H2.
+Do not install or download missing runtimes, binaries, Node packages, or system software. Maven may resolve dependencies declared in `pom.xml`. If a mandatory tool is unavailable, report the exact command and output as an environmental blocker.
 
-### Author
+## Execution order
 
-- `id`
-- `firstName`
-- `lastName`
-- `age`
+### Phase 1 — Persistence
 
-### Book
+Re-read `AGENTS.md`, then read and execute `BENCHMARK_BACKEND_DB.md` completely.
 
-- `id`
-- `title`
-- `description`
+Gate before Phase 2:
 
-The relationship is bidirectional many-to-many: an author has many books and a book has many authors.
+- all persistence requirements implemented;
+- complete Maven test suite reports `BUILD SUCCESS`;
+- persistence milestone committed.
 
-## Required implementation
+### Phase 2 — REST backend
 
-Create:
+Re-read `AGENTS.md`, then read and execute `BENCHMARK_BACKEND_REST.md` completely.
 
-- `pom.xml`
-- Spring Boot application class
-- `Author` and `Book` JPA entities
-- one repository per entity
-- a service
-- JUnit 5 integration tests
-- minimal H2 test configuration
+Gate before Phase 3:
 
-The service must:
+- all persistence and REST tests pass together;
+- complete Maven test suite reports `BUILD SUCCESS`;
+- REST milestone committed.
 
-1. Persist a book associated with multiple authors.
-2. Return `List<String>` containing the titles of books associated with an author ID through a real repository query.
+### Phase 3 — Angular frontend
 
-## Persistence design
+Re-read `AGENTS.md`, then read and execute `BENCHMARK_ANGULAR.md` completely.
 
-- Use `jakarta.persistence`.
-- Use exactly one owning side with `@JoinTable`; prefer `Book` as the owning side.
-- Maintain both Java-side collections through helper methods such as `book.addAuthor(author)`.
-- Do not use `CascadeType.ALL`.
-- Keep the design minimal; no DTOs, mappers, extra domain layers, or unrelated utilities are required.
+## Final validation
 
-## Required tests
+After all phases are implemented, run the real commands without hiding their exit status:
 
-Use `@SpringBootTest`, JUnit 5, and AssertJ or JUnit assertions. Never use native Java `assert`.
-
-Create tests that prove:
-
-1. **Book with multiple authors is persisted**
-   - create two authors and one book;
-   - associate them through the helper method;
-   - persist through the service;
-   - call `flush()` and `clear()`;
-   - reload from the database;
-   - assert that the reloaded book has exactly both authors.
-
-2. **Titles are queried by author ID**
-   - persist an author associated with at least two books;
-   - call `flush()` and `clear()` before querying;
-   - invoke the service method using the persisted author ID;
-   - assert the exact returned titles.
-
-Do not replace database reloads with assertions against objects still held in the persistence context. Do not weaken or remove `flush()` and `clear()` checks.
-
-## Completion
-
-Run `mvn test` after test creation and after every meaningful correction. Continue until Maven reports:
-
-```text
-BUILD SUCCESS
+```bash
+npm --prefix frontend run build
+mvn clean package
+git diff --check
+git status --short
 ```
 
-Only then run:
+Success requires:
+
+- Angular production build succeeds;
+- complete Maven build and all backend tests succeed;
+- the packaged Spring Boot application contains and serves the Angular frontend;
+- all phase requirements remain satisfied;
+- final Angular milestone is committed;
+- `git status --short` is clean after final validation.
+
+Only after all of the above succeeds, run:
 
 ```bash
 ./notify-success.sh
 ```
+
+Do not notify after an intermediate phase.

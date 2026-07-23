@@ -17,7 +17,7 @@
         "-y",
         "@playwright/mcp@latest",
         "--browser",
-        "firefox",
+        "chrome",
         "--isolated",
         "--timeout-navigation",
         "120000"

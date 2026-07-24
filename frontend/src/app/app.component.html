@@ -1,0 +1,386 @@
+<div class="container">
+  <h1>Library Management</h1>
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  <!-- Publisher Section -->
+  <section class="publisher-section">
+    <h2>Publishers</h2>
+
+    @if (loadingPublishers) {
+      <p>Loading publishers...</p>
+    } @else {
+      <form (ngSubmit)="createPublisher()" #publisherForm="ngForm" class="publisher-form">
+        <input type="text" name="name" [(ngModel)]="publisherName" placeholder="Publisher Name" required />
+        <input type="text" name="country" [(ngModel)]="publisherCountry" placeholder="Country (optional)" />
+        <button type="submit" [disabled]="isCreatingPublisher">Create Publisher</button>
+      </form>
+
+      @if (publishers.length === 0) {
+        <p>No publishers yet.</p>
+      } @else {
+        <ul class="publisher-list">
+          @for (publisher of publishers; track publisher.id) {
+            <li class="publisher-item">
+              <span>{{ publisher.name }}</span>
+              @if (publisher.country) {
+                <span>({{ publisher.country }})</span>
+              }
+              <button (click)="startEditPublisher(publisher)">Edit</button>
+              <button (click)="deletePublisher(publisher.id)" [disabled]="publisherHasBooks(publisher.id)">
+                Delete
+              </button>
+
+              @if (editingPublisher && editingPublisher.id === publisher.id) {
+                <div class="edit-form">
+                  <input type="text" [(ngModel)]="editingPublisher.name" placeholder="Name" />
+                  <input type="text" [(ngModel)]="editingPublisher.country" placeholder="Country" />
+                  <button (click)="savePublisher()">Save</button>
+                  <button (click)="cancelEditPublisher()">Cancel</button>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <!-- Author Section -->
+  <section class="author-section">
+    <h2>Authors</h2>
+
+    @if (loadingAuthors) {
+      <p>Loading authors...</p>
+    } @else {
+      <form (ngSubmit)="createAuthor()" #authorForm="ngForm" class="author-form">
+        <input type="text" name="firstName" [(ngModel)]="firstName" placeholder="First Name" required />
+        <input type="text" name="lastName" [(ngModel)]="lastName" placeholder="Last Name" required />
+        <input type="number" name="age" [(ngModel)]="age" placeholder="Age (optional)" />
+        <button type="submit" [disabled]="isCreatingAuthor">Create Author</button>
+      </form>
+
+      @if (authors.length === 0) {
+        <p>No authors yet.</p>
+      } @else {
+        <ul class="author-list">
+          @for (author of authors; track author.id) {
+            <li class="author-item">
+              <span>{{ author.firstName }} {{ author.lastName }}</span>
+              @if (author.age) {
+                <span>(Age: {{ author.age }})</span>
+              }
+              @if (author.genres.length > 0) {
+                <div class="genres">
+                  <strong>Genres:</strong>
+                  @for (genre of author.genres; track genre) {
+                    <span>{{ genre }}</span>
+                  }
+                </div>
+              }
+              <button (click)="startEditAuthor(author)">Edit</button>
+              <button (click)="deleteAuthor(author.id)">Delete</button>
+
+              @if (editingAuthor && editingAuthor.id === author.id) {
+                <div class="edit-form">
+                  <input type="text" [(ngModel)]="editingAuthor.firstName" placeholder="First Name" />
+                  <input type="text" [(ngModel)]="editingAuthor.lastName" placeholder="Last Name" />
+                  <input type="number" [(ngModel)]="editingAuthor.age" placeholder="Age" />
+                  <button (click)="saveAuthor()">Save</button>
+                  <button (click)="cancelEditAuthor()">Cancel</button>
+                </div>
+              }
+
+              <button (click)="selectedAuthorIds = [author.id]; getBookTitlesForAuthor(author)">
+                View Books
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <!-- Book Section -->
+  <section class="book-section">
+    <h2>Books</h2>
+
+    @if (loadingBooks) {
+      <p>Loading books...</p>
+    } @else {
+      <form (ngSubmit)="createBook()" #bookForm="ngForm" class="book-form">
+        <input type="text" name="title" [(ngModel)]="bookTitle" placeholder="Book Title" required />
+        <textarea name="argumento" [(ngModel)]="bookArgument" placeholder="Argument"></textarea>
+        <input type="text" name="genre" [(ngModel)]="bookGenre" placeholder="Genre" />
+
+        @if (publishers.length > 0) {
+          <div class="publisher-selection">
+            <h4>Select Publisher:</h4>
+            <select [(ngModel)]="selectedPublisherId" name="publisher">
+              <option value="">No Publisher</option>
+              @for (publisher of publishers; track publisher.id) {
+                <option [value]="publisher.id">{{ publisher.name }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @if (authors.length > 0) {
+          <div class="author-selection">
+            <h4>Select Authors:</h4>
+            @for (author of authors; track author.id) {
+              <label>
+                <input type="checkbox"
+                       [value]="author.id"
+                       [checked]="selectedAuthorIds.includes(author.id)"
+                       (change)="toggleAuthorSelection(author.id, $event)" />
+                {{ author.firstName }} {{ author.lastName }}
+              </label>
+            }
+          </div>
+        } @else {
+          <p class="warning">Please create authors first.</p>
+        }
+
+        <button type="submit" [disabled]="isCreatingBook || selectedAuthorIds.length === 0">
+          Create Book
+        </button>
+      </form>
+
+      @if (books.length === 0) {
+        <p>No books yet.</p>
+      } @else {
+        <ul class="book-list">
+          @for (book of books; track book.id) {
+            <li class="book-item">
+              <h3>{{ book.title }}</h3>
+
+              @if (book.coverImage && book.coverImage.data) {
+                <div class="cover-image">
+                  <img [src]="'data:' + book.coverImage.contentType + ';base64,' + book.coverImage.data" alt="Book Cover" />
+                  <button (click)="deleteCover(book.id)">Remove Cover</button>
+                </div>
+              } @else {
+                <div class="cover-placeholder">
+                  No cover image
+                  <input type="file" #coverInput id="cover-{{ book.id }}" accept="image/*" style="display: none;"
+                         (change)="uploadCover(book.id, $event)" />
+                  <button (click)="coverInput.click()">Upload Cover</button>
+                </div>
+              }
+
+              @if (book.argument) {
+                <p><strong>Argument:</strong> {{ book.argument }}</p>
+              }
+              @if (book.genre) {
+                <p><strong>Genre:</strong> {{ book.genre }}</p>
+              }
+              @if (book.publisherId) {
+                @if (findPublisherById(book.publisherId)) {
+                  <p><strong>Publisher:</strong> {{ findPublisherById(book.publisherId)?.name }}</p>
+                }
+              } @else {
+                <p><strong>Publisher:</strong> N/A</p>
+              }
+              <div class="authors">
+                Authors:
+                @for (author of getBookAuthors(book.authorIds); track author.id) {
+                  <span>{{ author.firstName }} {{ author.lastName }}</span>
+                }
+              </div>
+              <button (click)="startEditBook(book)">Edit</button>
+              <button (click)="deleteBook(book.id)">Delete</button>
+
+              @if (editingBook && editingBook.id === book.id) {
+                <div class="edit-form">
+                  <input type="text" [(ngModel)]="editingBook.title" placeholder="Title" />
+                  <textarea [(ngModel)]="editingBook.argument" placeholder="Argument"></textarea>
+                  <input type="text" [(ngModel)]="editingBook.genre" placeholder="Genre" />
+
+                  @if (publishers.length > 0) {
+                    <select [(ngModel)]="editingBook.publisherId">
+                      <option value="">No Publisher</option>
+                      @for (publisher of publishers; track publisher.id) {
+                        <option [value]="publisher.id">{{ publisher.name }}</option>
+                      }
+                    </select>
+                  }
+
+                  <div class="author-selection-edit">
+                    @for (author of authors; track author.id) {
+                      <label>
+                        <input type="checkbox"
+                               [checked]="editingBook.authorIds.includes(author.id)"
+                               (change)="toggleAuthorSelectionForEdit(author.id, $event)" />
+                        {{ author.firstName }} {{ author.lastName }}
+                      </label>
+                    }
+                  </div>
+
+                  <button (click)="saveBook()">Save</button>
+                  <button (click)="cancelEditBook()">Cancel</button>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <!-- Selected Author Books -->
+  @if (selectedAuthorIds.length > 0 && authors.length > 0) {
+    <section class="author-books-section">
+      <h2>Books by Selected Author</h2>
+
+      @for (author of authors; track author.id) {
+        @if (selectedAuthorIds.includes(author.id)) {
+          <div class="author-books">
+            <h3>{{ author.firstName }} {{ author.lastName }}</h3>
+            @if (getBookTitlesForAuthor(author).length === 0) {
+              <p>No books yet.</p>
+            } @else {
+              <ul>
+                @for (title of getBookTitlesForAuthor(author); track title) {
+                  <li>{{ title }}</li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      }
+    </section>
+  }
+</div>
+
+<style>
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  h1, h2, h3 {
+    color: #333;
+  }
+
+  .error {
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    color: #c62828;
+  }
+
+  section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+  }
+
+  .publisher-form, .author-form, .book-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  input, textarea, select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  button {
+    padding: 8px 16px;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 5px;
+  }
+
+  button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .publisher-list, .author-list, .book-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .publisher-item, .author-item, .book-item {
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .publisher-form div, .author-form div, .book-form div {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .publisher-selection, .author-selection, .author-selection-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 10px 0;
+  }
+
+  .warning {
+    color: #f57c00;
+    font-style: italic;
+  }
+
+  .genres {
+    margin-top: 5px;
+  }
+
+  .genres span {
+    display: inline-block;
+    background-color: #e3f2fd;
+    padding: 2px 8px;
+    margin-right: 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .edit-form {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .cover-image, .cover-placeholder {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cover-image img {
+    max-width: 150px;
+    max-height: 200px;
+    object-fit: contain;
+  }
+</style>

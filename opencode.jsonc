@@ -9,21 +9,6 @@
     "ollama-pc"
   ],
 
-  // Enable all built-in and MCP tools. Keep a few unrelated capabilities disabled.
-  // This uses the legacy boolean tool map because the installed ACP/OpenCode parser
-  // rejects granular per-agent permission keys in this environment.
-  "tools": {
-    "*": true,
-    "task": false,
-    "skill": false,
-    "lsp": false,
-    "webfetch": false,
-    "websearch": false
-  },
-
-  // Use the parser-compatible shorthand instead of a granular permission object.
-  "permission": "allow",
-
   "mcp": {
     "playwright": {
       "type": "local",
@@ -102,4 +87,27 @@
       "LICENSE",
       "*.log"
     ]
+  },
+
+  "permission": {
+    "read": "allow",
+    "edit": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "bash": "allow",
+    "question": "allow",
+    "codegraph_*": "allow",
+    "playwright_*": "allow",
+    "task": "deny",
+    "skill": "deny",
+    "lsp": "deny",
+    "webfetch": "deny",
+    "websearch": "deny",
+    "external_directory": {
+      "/tmp/**": "allow",
+      "~/.cache/ms-playwright/**": "allow"
+    },
+    "doom_loop": "deny"
   }
+}

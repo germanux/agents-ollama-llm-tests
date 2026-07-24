@@ -15,6 +15,13 @@
     "build": {
       "permission": {
         "playwright_*": "allow"
+      },
+
+      "tools": {
+        "codegraph_*": true
+      },
+      "permission": {
+        "codegraph_*": "allow"
       }
     }
   },

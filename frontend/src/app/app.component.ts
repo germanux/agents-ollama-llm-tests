@@ -265,12 +265,6 @@ export class AppComponent {
   }
 
   deletePublisher(id: number) {
-    const publisherHasBooks = this.books.some(b => b.publisherId === id);
-    if (publisherHasBooks) {
-      this.error = 'Cannot delete Publisher that still has Books';
-      return;
-    }
-
     if (!confirm('Are you sure you want to delete this publisher?')) return;
 
     this.api.deletePublisher(id).subscribe({
@@ -301,6 +295,17 @@ export class AppComponent {
     }
   }
 
+  toggleAuthorSelectionForEdit(authorId: number, event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      if (!this.editingBook?.authorIds.includes(authorId)) {
+        this.editingBook?.authorIds.push(authorId);
+      }
+    } else {
+      this.editingBook!.authorIds = this.editingBook!.authorIds.filter(id => id !== authorId);
+    }
+  }
+
   getBookTitlesForAuthor(author: Author): string[] {
     const bookIds = this.books
       .filter(book => book.authorIds.includes(author.id))
@@ -321,5 +326,50 @@ export class AppComponent {
   findPublisherById(id: number | null): Publisher | undefined {
     if (!id) return undefined;
     return this.publishers.find(p => p.id === id);
+  }
+
+  publisherHasBooks(publisherId: number): boolean {
+    return this.books.some(b => b.publisherId === publisherId);
+  }
+
+  uploadCover(bookId: number, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.api.uploadCover(bookId, file).subscribe({
+      next: (updatedBook) => {
+        const index = this.books.findIndex(b => b.id === bookId);
+        if (index !== -1) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            this.books[index].coverImage = {
+              data: reader.result as string,
+              contentType: file.type
+            };
+          };
+          reader.readAsDataURL(file);
+        }
+      },
+      error: (err) => {
+        this.error = err.message;
+      }
+    });
+  }
+
+  deleteCover(bookId: number) {
+    if (!confirm('Are you sure you want to remove the cover image?')) return;
+
+    this.api.deleteCover(bookId).subscribe({
+      next: () => {
+        const index = this.books.findIndex(b => b.id === bookId);
+        if (index !== -1) {
+          this.books[index].coverImage = undefined;
+        }
+      },
+      error: (err) => {
+        this.error = err.message;
+      }
+    });
   }
 }

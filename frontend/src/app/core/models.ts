@@ -13,6 +13,10 @@ export interface Book {
   genre: string;
   authorIds: number[];
   publisherId: number | null;
+  coverImage?: {
+    data: string;
+    contentType: string;
+  };
 }
 
 export interface Publisher {

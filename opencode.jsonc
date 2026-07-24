@@ -17,10 +17,6 @@
         "playwright_*": "allow"
       },
 
-      "tools": {
-        "*": false,
-        "codegraph_*": true
-      },
       "permission": {
         "codegraph_*": "allow"
       }
@@ -41,6 +37,15 @@
       ],
       "enabled": true,
       "timeout": 30000
+    },
+    "codegraph": {
+      "type": "local",
+      "command": [
+        "codegraph",
+        "serve",
+        "--mcp"
+      ],
+      "enabled": true
     }
   },
   "model": "ollama-pc/qwen3-coder-next-direct",
@@ -99,14 +104,13 @@
   },
 
   "permission": {
-    "playwright_*": "allow",
-    "*": "allow",
-    "read": {
-      "*": "deny",
-      "*.env": "deny",
-      "*.env.*": "deny",
-      "**/.env": "deny",
-      "**/.env.*": "deny"
+    "read": "allow",
+    "edit": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "bash": "allow",
+    "codegraph_*": "allow",
+    "playwright_*": "allow"
     },
     "glob": "allow",
     "grep": "allow",

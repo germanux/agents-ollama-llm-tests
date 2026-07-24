@@ -29,6 +29,14 @@
               @if (author.age) {
                 <span>(Age: {{ author.age }})</span>
               }
+              @if (author.genres.length > 0) {
+                <div class="genres">
+                  <strong>Genres:</strong>
+                  @for (genre of author.genres; track genre) {
+                    <span>{{ genre }}</span>
+                  }
+                </div>
+              }
               <button (click)="selectedAuthorIds = [author.id]; getBookTitlesForAuthor(author)">
                 View Books
               </button>
@@ -48,7 +56,8 @@
     } @else {
       <form (ngSubmit)="createBook()" #bookForm="ngForm" class="book-form">
         <input type="text" name="title" [(ngModel)]="bookTitle" placeholder="Book Title" required />
-        <textarea name="description" [(ngModel)]="bookDescription" placeholder="Description"></textarea>
+        <textarea name="argumento" [(ngModel)]="bookArgument" placeholder="Argument"></textarea>
+        <input type="text" name="genre" [(ngModel)]="bookGenre" placeholder="Genre" />
         
         @if (authors.length > 0) {
           <div class="author-selection">
@@ -79,8 +88,11 @@
           @for (book of books; track book.id) {
             <li class="book-item">
               <h3>{{ book.title }}</h3>
-              @if (book.description) {
-                <p>{{ book.description }}</p>
+              @if (book.argument) {
+                <p><strong>Argument:</strong> {{ book.argument }}</p>
+              }
+              @if (book.genre) {
+                <p><strong>Genre:</strong> {{ book.genre }}</p>
               }
               <div class="authors">
                 Authors: 
@@ -200,5 +212,18 @@
   .warning {
     color: #f57c00;
     font-style: italic;
+  }
+
+  .genres {
+    margin-top: 5px;
+  }
+
+  .genres span {
+    display: inline-block;
+    background-color: #e3f2fd;
+    padding: 2px 8px;
+    margin-right: 5px;
+    border-radius: 4px;
+    font-size: 12px;
   }
 </style>

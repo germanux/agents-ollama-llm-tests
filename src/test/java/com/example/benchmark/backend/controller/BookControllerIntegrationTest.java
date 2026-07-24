@@ -33,11 +33,12 @@ class BookControllerIntegrationTest {
         // Then create a book with both authors
         mockMvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Spring Boot Guide\",\"description\":\"A comprehensive guide\",\"authorIds\":[1,2]}"))
+                        .content("{\"title\":\"Spring Boot Guide\",\"argument\":\"A comprehensive guide\",\"genre\":\"Fiction\",\"authorIds\":[1,2]}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.title").value("Spring Boot Guide"))
-                .andExpect(jsonPath("$.description").value("A comprehensive guide"));
+                .andExpect(jsonPath("$.argument").value("A comprehensive guide"))
+                .andExpect(jsonPath("$.genre").value("Fiction"));
     }
 
     @Test
@@ -51,7 +52,7 @@ class BookControllerIntegrationTest {
         // Try to create a book with a non-existent author ID
         mockMvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Test Book\",\"description\":\"A test\",\"authorIds\":[1,999]}"))
+                        .content("{\"title\":\"Test Book\",\"argument\":\"A test\",\"genre\":\"Fiction\",\"authorIds\":[1,999]}"))
                 .andExpect(status().isNotFound());
     }
 
@@ -65,7 +66,7 @@ class BookControllerIntegrationTest {
 
         mockMvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Spring Boot Guide\",\"description\":\"A guide\",\"authorIds\":[1]}"))
+                        .content("{\"title\":\"Spring Boot Guide\",\"argument\":\"A guide\",\"genre\":\"Fiction\",\"authorIds\":[1]}"))
                 .andExpect(status().isCreated());
 
         // List books - verify response contains the book
@@ -73,6 +74,9 @@ class BookControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        result.getResponse().getContentAsString().contains("\"title\":\"Spring Boot Guide\"");
+        var content = result.getResponse().getContentAsString();
+        org.junit.jupiter.api.Assertions.assertTrue(content.contains("\"title\":\"Spring Boot Guide\""), "Response should contain book title");
+        org.junit.jupiter.api.Assertions.assertTrue(content.contains("\"argument\":\"A guide\""), "Response should contain argument field");
+        org.junit.jupiter.api.Assertions.assertTrue(content.contains("\"genre\":\"Fiction\""), "Response should contain genre field");
     }
 }

@@ -3,13 +3,22 @@ export interface Author {
   firstName: string;
   lastName: string;
   age: number | null;
+  genres: string[];
 }
 
 export interface Book {
   id: number;
   title: string;
-  description: string;
+  argument: string;
+  genre: string;
   authorIds: number[];
+  publisherId: number | null;
+}
+
+export interface Publisher {
+  id: number;
+  name: string;
+  country: string;
 }
 
 export interface ErrorResponse {

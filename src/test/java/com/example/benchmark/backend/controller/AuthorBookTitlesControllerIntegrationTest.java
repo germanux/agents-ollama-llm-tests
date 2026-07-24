@@ -27,12 +27,12 @@ class AuthorBookTitlesControllerIntegrationTest {
 
         mockMvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"1984\",\"description\":\"Dystopian\",\"authorIds\":[1]}"))
+                        .content("{\"title\":\"1984\",\"argument\":\"Dystopian\",\"genre\":\"Fiction\",\"authorIds\":[1]}"))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Animal Farm\",\"description\":\"Allegory\",\"authorIds\":[1]}"))
+                        .content("{\"title\":\"Animal Farm\",\"argument\":\"Allegory\",\"genre\":\"Fiction\",\"authorIds\":[1]}"))
                 .andExpect(status().isCreated());
 
         // Get book titles by author ID
@@ -40,7 +40,9 @@ class AuthorBookTitlesControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        result.getResponse().getContentAsString().contains("\"1984\"");
+        var content = result.getResponse().getContentAsString();
+        org.junit.jupiter.api.Assertions.assertTrue(content.contains("\"1984\""), "Response should contain first book title");
+        org.junit.jupiter.api.Assertions.assertTrue(content.contains("\"Animal Farm\""), "Response should contain second book title");
     }
 
     @Test

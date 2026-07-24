@@ -16,7 +16,20 @@ public class Book {
     @Column(nullable = false)
     private String title;
 
-    private String description;
+    private String argument;
+
+    private String genre;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publisher_id")
+    private Publisher publisher;
+
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] coverImageData;
+
+    @Column(length = 100)
+    private String coverImageContentType;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -29,9 +42,9 @@ public class Book {
     public Book() {
     }
 
-    public Book(String title, String description) {
+    public Book(String title, String argument) {
         this.title = title;
-        this.description = description;
+        this.argument = argument;
     }
 
     public Long getId() {
@@ -50,12 +63,44 @@ public class Book {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
+    public String getArgumento() {
+        return argument;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setArgument(String argument) {
+        this.argument = argument;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public Publisher getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(Publisher publisher) {
+        this.publisher = publisher;
+    }
+
+    public byte[] getCoverImageData() {
+        return coverImageData;
+    }
+
+    public void setCoverImageData(byte[] coverImageData) {
+        this.coverImageData = coverImageData;
+    }
+
+    public String getCoverImageContentType() {
+        return coverImageContentType;
+    }
+
+    public void setCoverImageContentType(String coverImageContentType) {
+        this.coverImageContentType = coverImageContentType;
     }
 
     public Set<Author> getAuthors() {

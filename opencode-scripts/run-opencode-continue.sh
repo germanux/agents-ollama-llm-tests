@@ -251,6 +251,23 @@ Do not declare success from file presence alone. Run every validation required b
 Limit initial reconnaissance to at most five tool calls.
 Trust checkpoints for implementation progress, but never for current acceptance validation.
 Run the pending phase validation early.
+
+Browser acceptance is mandatory and must be proven in the current session.
+Before running notify-success.sh:
+
+1. Start the packaged JAR and capture its PID.
+2. Wait until HTTP readiness succeeds.
+3. Validate every required REST endpoint with curl -fS and record its HTTP status.
+4. Fetch `/` and save the returned HTML.
+5. Extract every local script src and stylesheet href from that HTML.
+6. Request each extracted asset using its exact browser URL.
+7. Require HTTP 200 for every HTML, JavaScript and CSS request.
+8. Treat empty curl output, connection failure, timeout, 3xx, 4xx or 5xx as validation failure.
+9. Stop exactly the captured PID.
+10. Run notify-success.sh only if every command above exits with status 0.
+
+Do not infer browser correctness from the build output, Git history, file presence,
+JAR contents, application startup logs, or the existence of index.html.
 EOF_PROMPT
 )
 

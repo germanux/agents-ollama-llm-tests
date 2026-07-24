@@ -8,23 +8,7 @@
     "ollama-local",
     "ollama-pc"
   ],
-  "tools": {
-    "playwright*": true
-  },
-  "agent": {
-    "build": {
-      "permission": {
-        "playwright_*": "allow"
-      },
 
-      "tools": {
-        "codegraph_*": true
-      },
-      "permission": {
-        "codegraph_*": "allow"
-      }
-    }
-  },
   "mcp": {
     "playwright": {
       "type": "local",
@@ -33,7 +17,7 @@
         "-y",
         "@playwright/mcp@latest",
         "--browser",
-        "chromium",
+        "chrome",
         "--isolated",
         "--timeout-navigation",
         "120000"
@@ -98,8 +82,7 @@
   },
 
   "permission": {
-    "playwright_*": "allow",
-    "*": "allow",
+    "*": "deny",
     "read": {
       "*": "deny",
       "*.env": "deny",
